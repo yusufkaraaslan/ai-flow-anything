@@ -133,9 +133,16 @@ flow-storage/
 │       ├── design/
 │       │   ├── task-design.md
 │       │   ├── task-technical-design.md
-│       │   └── task-edge-cases.md
-│       ├── implement/flow-plan/
-│       └── docs/lessons-learned.md
+│       │   ├── task-edge-cases.md
+│       │   └── diagrams/
+│       ├── implement/
+│       │   └── flow-plan/
+│       ├── test/
+│       ├── pr/
+│       │   └── feedback/
+│       ├── deploy/
+│       └── docs/
+│           └── lessons-learned.md
 └── team/
     ├── onboarding.md
     ├── workflows.md

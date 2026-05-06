@@ -1,7 +1,8 @@
 # Flow Authoring Guide
 
 > **Applies to:** Profile authors, advanced users  
-> **Purpose:** How to write flow skeletons that AI assistants can execute
+> **Purpose:** How to write flow skeletons that AI assistants can execute  
+> **See also:** For creating a full profile (structure, discovery, rules, + skeletons), use [`docs/how-to-create-profile.md`](../docs/how-to-create-profile.md). This guide covers only flow skeleton authoring.
 
 ---
 
