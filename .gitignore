@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+
+# Nothing to ignore in flow-storage/ (it's the KB source of truth)

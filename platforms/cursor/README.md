@@ -46,4 +46,4 @@ rm .cursor/rules/ai-flow-anything.mdc
 rm -rf .ai-workflow
 ```
 
-This removes ai-flow-anything but leaves the project's own `docs/` (your knowledge base) and any other `.cursor/rules/` files untouched.
+This removes ai-flow-anything but leaves the project's own `flow-storage/` (your knowledge base) and any other `.cursor/rules/` files untouched.

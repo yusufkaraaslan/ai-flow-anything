@@ -281,5 +281,5 @@ These rules are enforced by:
 
 **Severity levels:**
 - **error** — Must fix before proceeding (Rule 1, 2, 4, 6, 8, 9)
-- **warning** — Should fix, can proceed with justification (Rule 3, 7, 10, 11)
-- **info** — Best practice, noted but not blocking (Rule 5, 12, 13, 14, 15)
+- **warning** — Should fix, can proceed with justification (Rule 3, 7, 10, 11, 12)
+- **info** — Best practice, noted but not blocking (Rule 5, 13, 14, 15)

@@ -379,7 +379,7 @@ Re-render on push to keep images in sync with sources:
 
 **Default:** PlantUML
 
-**Developer override:** Add to `.ai-workflow/config.md`:
+**Developer override:** Create `.ai-workflow/config.md` with diagram format preference:
 ```markdown
 ## Diagram Format
 
@@ -388,7 +388,7 @@ Fallback format: PlantUML
 ```
 
 **AI decision tree:**
-1. Check `.ai-workflow/config.md` for format preference
+1. Check `.ai-workflow/config.md` for format preference (file is optional — skip if absent)
 2. If not specified, use PlantUML
 3. If platform supports Mermaid natively (GitHub/GitLab), suggest Mermaid
 4. If developer explicitly requests D2, use D2

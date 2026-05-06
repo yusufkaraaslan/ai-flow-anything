@@ -304,7 +304,6 @@ Bundling them would lose meaningful safety.
 Phase 1: PREPARE
   Sub-tasks (auto-proceed):
     1.1 CHECKLIST
-        → Run pre-deploy checklist from profile rules.md
         → Verify: tests pass, lint clean, version bumped, changelog
           updated, no debug code in build, secrets not in artifacts
     1.2 VERSION

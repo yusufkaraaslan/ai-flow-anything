@@ -77,7 +77,7 @@ The generic profile is designed to be customized. After init:
 2. Edit flow files in `.ai-workflow/flows/` to add language-specific patterns
 3. Add custom slots by editing the discovery process
 
-See [docs/how-to-customize.md](../docs/how-to-customize.md) for details.
+See [docs/how-to-customize.md](../../docs/how-to-customize.md) for details.
 
 ---
 

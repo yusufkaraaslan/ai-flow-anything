@@ -14,7 +14,7 @@ When a user installs ai-flow-anything and asks the AI to initialize it, the AI:
 2. Loads `universal/rules.md` (always) + `profiles/{detected}/{README,discovery,rules}.md`
 3. Executes the discovery script in `discovery.md` to fill a slot catalog
 4. Renders skeletons from `profiles/{detected}/skeletons/*.md` into `.ai-workflow/flows/*.md` in the user's project
-5. Initializes the three-tier knowledge base in `docs/`
+5. Initializes the three-tier knowledge base in `flow-storage/`
 
 **The entry point is `instructions.md` at the repo root.** Read it first to understand the orchestration contract. Per-platform wrappers in `platforms/{tool}/` are intentionally thin and reference it.
 
@@ -57,7 +57,7 @@ Each platform wrapper packages the universal workflow for a specific AI tool. Wr
 
 | Tool | Wrapper file | Install target | Trigger model |
 |------|-------------|----------------|---------------|
-| Claude Code | `platforms/claude/SKILL.md` | `.ai-workflow/SKILL.md` | YAML `description` matches user request |
+| Claude Code | `platforms/claude/SKILL.md` | `.claude/skills/ai-flow-anything/SKILL.md` | YAML `description` matches user request |
 | Cursor | `platforms/cursor/ai-flow-anything.mdc` | `.cursor/rules/ai-flow-anything.mdc` | "Apply Intelligently" — agent reads `description` |
 | GitHub Copilot | `platforms/github-copilot/copilot-instructions.md` | `.github/copilot-instructions.md` | Always-on |
 | OpenCode | `platforms/opencode/SKILL.md` | `.opencode/skills/ai-flow-anything/SKILL.md` | Skill loaded on demand by `description` |

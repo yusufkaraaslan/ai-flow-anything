@@ -109,7 +109,7 @@ This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that
 **Gate:** Results review — [A]ccept / [F]eedback / [R]eject  
 *(GATE TYPE B — STANDARD)*
 
-Note: test-flow does not have a COMMIT phase. Tests are committed by implement-flow (alongside the code) or pr-flow (as part of validation).
+Note: test-flow does not have a COMMIT phase. Tests are committed by implement-flow (alongside the code) or pr-flow (as part of validation). **After accepting this gate, the generated test files exist on disk but are NOT committed.** Run implement-flow or pr-flow next to land them in version control.
 
 ---
 

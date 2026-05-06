@@ -24,14 +24,14 @@ Each flow skill has an imperative description naming its trigger phrases. The ag
 
 | Command | Source | Invocation |
 |---|---|---|
-| `/design <task>` | `platforms/opencode/commands/design.md` | Run design-flow for a task |
-| `/implement <task> [task-flow]` | `platforms/opencode/commands/implement.md` | Implement one task flow from a designed task |
-| `/test [task]` | `platforms/opencode/commands/test.md` | Run or add tests |
-| `/pr <task> [mode]` | `platforms/opencode/commands/pr.md` | Pre-PR validation, feedback, or capture |
-| `/deploy [task]` | `platforms/opencode/commands/deploy.md` | Build verification + smoke test |
-| `/docs [scope]` | `platforms/opencode/commands/docs.md` | Audit/update knowledge base |
+| `/design-flow <task>` | `platforms/opencode/commands/design-flow.md` | Run design-flow for a task |
+| `/implement-flow <task> [task-flow]` | `platforms/opencode/commands/implement-flow.md` | Implement one task flow from a designed task |
+| `/test-flow [task]` | `platforms/opencode/commands/test-flow.md` | Run or add tests |
+| `/pr-flow <task> [mode]` | `platforms/opencode/commands/pr-flow.md` | Pre-PR validation, feedback, or capture |
+| `/deploy-flow [task]` | `platforms/opencode/commands/deploy-flow.md` | Build verification + smoke test |
+| `/docs-flow [scope]` | `platforms/opencode/commands/docs-flow.md` | Audit/update knowledge base |
 
-Each command is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow. Without these, the developer has to either rely on natural-language matching to the skills (works but unreliable) or use `/skills → pick` (two clicks). With commands, `/design board-system` is one keystroke.
+Each command is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow. Without these, the developer has to either rely on natural-language matching to the skills (works but unreliable) or use `/skills → pick` (two clicks). With commands, `/design-flow board-system` is one keystroke.
 
 ## Install
 

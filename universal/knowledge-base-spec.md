@@ -384,7 +384,7 @@ Searches:
 
 ### Backups
 
-Knowledge base is version-controlled (in `docs/`). No separate backup needed.
+Knowledge base is version-controlled (in `flow-storage/`). No separate backup needed.
 
 ---
 

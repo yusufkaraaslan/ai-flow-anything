@@ -117,7 +117,7 @@ For each tool identified in Step 0, install the matching wrapper(s) to its canon
 
 | Tool | Source | Destination |
 |---|---|---|
-| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all six flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all six command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design,implement,pr,test,deploy,docs}-flow/SKILL.md`, AND `.opencode/commands/{design,implement,test,pr,deploy,docs}.md` (7 skills + 6 commands = 13 files) |
+| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all six flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all six command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design,implement,pr,test,deploy,docs}-flow/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md` (7 skills + 6 commands = 13 files) |
 | Claude Code | `platforms/claude/SKILL.md` | `.claude/skills/ai-flow-anything/SKILL.md` |
 | Cursor | `platforms/cursor/ai-flow-anything.mdc` | `.cursor/rules/ai-flow-anything.mdc` |
 | GitHub Copilot | `platforms/github-copilot/copilot-instructions.md` | `.github/copilot-instructions.md` (append, do not overwrite if file already exists) |
@@ -174,7 +174,7 @@ If the discovery step turned up project-specific rules that don't belong in the 
 Create the initial knowledge base structure per `universal/knowledge-base-spec.md`:
 
 ```
-docs/
+flow-storage/
 ├── project/
 │   ├── ARCHITECTURE.md
 │   ├── CONVENTIONS.md
@@ -182,11 +182,14 @@ docs/
 │   └── DECISIONS.md
 ├── team/
 │   ├── onboarding.md
-│   └── workflows.md
+│   ├── workflows.md
+│   └── glossary.md
 └── tasks/                ← empty, populated by design-flow
 ```
 
 Populate `project/*.md` from discovery findings (architecture, naming conventions, ADRs surfaced from existing docs). Leave `tasks/` empty.
+
+**Re-init:** If `flow-storage/project/*.md` files already exist (prior init), do NOT overwrite them blindly. Compare against discovery findings and only add new information that doesn't contradict what's already present. The KB accumulates — re-init should enrich, not replace.
 
 #### 7.6 Project-level directive (AGENTS.md / CLAUDE.md augmentation)
 
@@ -251,7 +254,7 @@ If multiple host tools were chosen in Step 0, write the directive to every appli
 
 Before declaring init complete, confirm every artifact landed. The AI must be able to answer "yes" to all of these:
 
-- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **seven** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **six** commands: `.opencode/commands/{design,implement,test,pr,deploy,docs}.md`. The skills picker should show 7 entries; typing `/` should suggest the 6 commands. Either missing means the install is incomplete.
+- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **seven** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **six** commands: `.opencode/commands/{design-flow,implement-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md`. The skills picker should show 7 entries; typing `/` should suggest the 6 commands. Either missing means the install is incomplete.
 - [ ] **`instructions.md` reachable** — either at `.ai-workflow/instructions.md` (Layout A) or via a symlink resolving to ai-flow-anything (Layout B). The wrapper's "Read `instructions.md` before acting" sentence must not be a dangling reference.
 - [ ] **`universal/rules.md` reachable** — at `.ai-workflow/universal/rules.md` or via the symlink.
 - [ ] **Detected profile reachable** — at `.ai-workflow/profiles/{detected}/` or via the symlink. At minimum the four files `README.md`, `discovery.md`, `rules.md`, and `skeletons/` must be present.
@@ -333,7 +336,7 @@ If no profile matches, ask the developer:
 > 2. **Create a custom profile** from scratch (I'll guide you)
 > 3. **Extend an existing profile** (closest match: {best-guess})"
 
-If they choose "Create custom," follow `universal/flow-authoring-guide.md`.
+If they choose "Create custom," follow `docs/how-to-create-profile.md`.
 
 ---
 

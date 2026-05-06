@@ -122,8 +122,7 @@ This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that
 ### File Organization
 
 ```
-docs/
-├── README.md              # Documentation index
+flow-storage/
 ├── project/
 │   ├── ARCHITECTURE.md
 │   ├── CONVENTIONS.md
@@ -131,16 +130,16 @@ docs/
 │   └── DECISIONS.md
 ├── tasks/
 │   └── {task-name}/
-│       ├── task-design.md
-│       ├── task-technical-design.md
-│       ├── task-edge-cases.md
-│       └── README.md
-├── team/
-│   ├── onboarding.md
-│   ├── workflows.md
-│   └── glossary.md
-└── api/
-    └── README.md
+│       ├── design/
+│       │   ├── task-design.md
+│       │   ├── task-technical-design.md
+│       │   └── task-edge-cases.md
+│       ├── implement/flow-plan/
+│       └── docs/lessons-learned.md
+└── team/
+    ├── onboarding.md
+    ├── workflows.md
+    └── glossary.md
 ```
 
 ### Naming
