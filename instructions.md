@@ -13,7 +13,7 @@ ai-flow-anything responds to the following developer intents. Each platform wrap
 | Intent | What the AI does |
 |--------|------------------|
 | **Initialize ai-flow-anything for this project** | Detect project type, discover the codebase, ask the developer for missing context, and generate tailored flows into `.ai-workflow/flows/`. |
-| **Run a specific flow** (design, implement, pr, test, deploy, docs) | Load the corresponding flow file from `.ai-workflow/flows/` and execute its phases against the named task. |
+| **Run a specific flow** (design, implement, orchestrate, pr, test, deploy, docs) | Load the corresponding flow file from `.ai-workflow/flows/` and execute its phases against the named task. |
 | **Show project workflow status** | Read the knowledge base and report progress across in-flight tasks and their task flows. |
 | **Search the knowledge base** | Query `flow-storage/project/`, `flow-storage/team/`, and `flow-storage/tasks/` for relevant prior work. |
 
@@ -117,13 +117,13 @@ For each tool identified in Step 0, install the matching wrapper(s) to its canon
 
 | Tool | Source | Destination |
 |---|---|---|
-| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all six flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all six command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design,implement,pr,test,deploy,docs}-flow/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md` (7 skills + 6 commands = 13 files) |
+| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all seven flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all seven command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design,implement,orchestrate,pr,test,deploy,docs}-flow/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,orchestrate-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md` (8 skills + 7 commands = 15 files) |
 | Claude Code | `platforms/claude/SKILL.md` | `.claude/skills/ai-flow-anything/SKILL.md` |
 | Cursor | `platforms/cursor/ai-flow-anything.mdc` | `.cursor/rules/ai-flow-anything.mdc` |
 | GitHub Copilot | `platforms/github-copilot/copilot-instructions.md` | `.github/copilot-instructions.md` (append, do not overwrite if file already exists) |
 | Kimi-Code CLI | `platforms/kimi-code/AGENTS.md` | `AGENTS.md` at repo root (append, do not overwrite — see notes in `platforms/kimi-code/README.md`) |
 
-**Why OpenCode installs seven skills plus six commands:** OpenCode has two concepts — *skills* (`.opencode/skills/{name}/SKILL.md`, agent decides via tool call when to load) and *commands* (`.opencode/commands/{name}.md`, user types `/{name}` to invoke directly). They're complementary, not redundant. Skills give the agent strong description-driven matching for natural-language requests; commands give the developer a one-keystroke way to start a flow without going through the `/skills` picker. Installing only skills leaves the developer with a two-click invocation (`/skills` → pick); installing both gets parity with Claude Code's `/design-flow <task>` slash UX. Each command file (~15–25 lines) is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow.
+**Why OpenCode installs eight skills plus seven commands:** OpenCode has two concepts — *skills* (`.opencode/skills/{name}/SKILL.md`, agent decides via tool call when to load) and *commands* (`.opencode/commands/{name}.md`, user types `/{name}` to invoke directly). They're complementary, not redundant. Skills give the agent strong description-driven matching for natural-language requests; commands give the developer a one-keystroke way to start a flow without going through the `/skills` picker. Installing only skills leaves the developer with a two-click invocation (`/skills` → pick); installing both gets parity with Claude Code's `/design-flow <task>` slash UX. Each command file (~15–25 lines) is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow.
 
 Prefer **symlinks** over copies if the OS supports them, so `git pull` in `.ai-workflow/` propagates wrapper updates automatically. Fall back to copy when symlinks aren't available.
 
@@ -139,10 +139,14 @@ Clone or copy the ai-flow-anything core into `.ai-workflow/` so the project owns
 .ai-workflow/
 ├── instructions.md          ← from ai-flow-anything root
 ├── universal/               ← copy of universal/ from ai-flow-anything
-├── profiles/{detected}/     ← at minimum, the detected profile
-├── flows/                 ← rendered output (Step 5)
+├── profiles/
+│   ├── generic/             ← always installed (canonical-flow fallback)
+│   └── {detected}/          ← the detected profile (if not generic)
+├── flows/                   ← rendered output (Step 5)
 └── rules.md                 ← project-specific overrides (Step 7.4)
 ```
+
+**Why install `profiles/generic/` even when the detected profile is not generic.** Slim profile skeletons (e.g. `profiles/godot-game/skeletons/implement-flow.md`) use the *defer pattern* — they contain a short "follows the canonical structure from `profiles/generic/skeletons/{flow}.md`" header and only add tech-specific overlay content. The defer reference is a real cross-reference the AI is expected to resolve at runtime. If `profiles/generic/` is not installed, the defer references dangle and the rendered slim flow is missing the bulk of its content (sub-tasks, gate definitions, sub-agent mode, etc.). Always install both.
 
 **Layout B — global install + symlink (only viable when the ai-flow-anything clone is project-private):**
 
@@ -221,6 +225,7 @@ When the developer's request matches one of the intents below, load and follow t
 |---|---|
 | "design task X" / "let's design X" | `.ai-workflow/flows/design-flow.md` |
 | "implement X" / "next task flow" | `.ai-workflow/flows/implement-flow.md` |
+| "orchestrate X" / "build everything for X" | `.ai-workflow/flows/orchestrate-flow.md` |
 | "test X" / "add tests" | `.ai-workflow/flows/test-flow.md` |
 | "validate X for PR" / "PR check" | `.ai-workflow/flows/pr-flow.md` |
 | "deploy X" / "build" | `.ai-workflow/flows/deploy-flow.md` |
@@ -254,10 +259,11 @@ If multiple host tools were chosen in Step 0, write the directive to every appli
 
 Before declaring init complete, confirm every artifact landed. The AI must be able to answer "yes" to all of these:
 
-- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **seven** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **six** commands: `.opencode/commands/{design-flow,implement-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md`. The skills picker should show 7 entries; typing `/` should suggest the 6 commands. Either missing means the install is incomplete.
+- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **eight** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,orchestrate-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **seven** commands: `.opencode/commands/{design-flow,implement-flow,orchestrate-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md`. The skills picker should show 8 entries; typing `/` should suggest the 7 commands. Either missing means the install is incomplete.
 - [ ] **`instructions.md` reachable** — either at `.ai-workflow/instructions.md` (Layout A) or via a symlink resolving to ai-flow-anything (Layout B). The wrapper's "Read `instructions.md` before acting" sentence must not be a dangling reference.
 - [ ] **`universal/rules.md` reachable** — at `.ai-workflow/universal/rules.md` or via the symlink.
 - [ ] **Detected profile reachable** — at `.ai-workflow/profiles/{detected}/` or via the symlink. At minimum the four files `README.md`, `discovery.md`, `rules.md`, and `skeletons/` must be present.
+- [ ] **Generic profile reachable as fallback** — at `.ai-workflow/profiles/generic/`. Always required because slim profile skeletons defer to `profiles/generic/skeletons/{flow}.md` for canonical content. If detected profile *is* generic, this is the same install as the line above and only one copy is needed.
 - [ ] **Flows rendered** — `.ai-workflow/flows/*.md` exists, no leaked `{slot}` placeholders (Rule 12), phase gates `[A]/[F]/[R]` intact.
 - [ ] **Knowledge base scaffold** — `flow-storage/project/`, `flow-storage/team/`, `flow-storage/tasks/` exist with the expected files.
 - [ ] **Project directive present** — for OpenCode, Claude Code, or Cursor host tools, the matching root file (`AGENTS.md` and/or `CLAUDE.md`) contains the ai-flow-anything directive between `<!-- ai-flow-anything-directive-start -->` and `<!-- ai-flow-anything-directive-end -->` sentinels. Skip for Copilot and Kimi-Code (their wrappers serve this role). Without this, the agent has no project-level pressure to defer to flows on natural-language requests and may improvise task work — making the install functionally inert even though all files are in place.

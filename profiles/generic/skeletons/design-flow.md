@@ -46,13 +46,13 @@ flow-storage/tasks/{task-name}/
 
 ## Phases
 
-This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that auto-proceed without intermediate gates. The gate is presented only when all sub-tasks of a phase complete. See `universal/workflow-structure.md` for the canonical pattern.
+This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes after acceptance — its only purpose is to lock the design and commit.
 
 ---
 
-### Phase 1: SPECIFY
+### Phase 1: DESIGN
 
-**Purpose:** Load context, design visually, and write the spec docs as one reviewable package.
+**Purpose:** Load context, design visually, write spec docs, decompose into task flows — all as one reviewable package. The developer reviews everything at once at the gate.
 
 **Sub-tasks (auto-proceed):**
 
@@ -76,26 +76,7 @@ This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that
 - Create `task-edge-cases.md`: boundary conditions, error scenarios, performance, security
 - If task has complex flows, generate sequence diagram `diagrams/03-sequence-{flow}.puml` (rendered)
 
-**Artifacts (presented at gate):**
-- `design/task-design.md`
-- `design/task-technical-design.md`
-- `design/task-edge-cases.md`
-- `design/diagrams/01-class-diagram.puml` + `.svg`
-- `design/diagrams/02-package-diagram.puml` + `.svg`
-- `design/diagrams/03-sequence-{flow}.puml` + `.svg` (if needed)
-
-**Gate:** Design package review — [A]ccept / [F]eedback / [R]eject  
-*(GATE TYPE B — STANDARD)*
-
----
-
-### Phase 2: COMMIT
-
-**Purpose:** Decompose into work items, sign off the design as immutable, and commit the whole package to git as one reviewable unit.
-
-**Sub-tasks (auto-proceed):**
-
-**2.1 PLAN**
+**1.4 PLAN**
 - AI analyzes task and proposes task flow breakdown:
   - Names describe the WORK, not architectural layers (kebab-case)
   - NUMBER of task flows is flexible (2-10+ depending on complexity)
@@ -114,15 +95,54 @@ This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that
   ---
   ```
 - Define acceptance criteria per task flow
+- Build task flow dependency graph
 - Generate `design/diagrams/04-task-flow-dependencies.puml` + render to `.svg`
-- Run internal PLAN validation (surface failures at the Phase 2 gate):
+- Run internal PLAN validation (surface failures at the gate):
   - Temporal contradictions in deps
   - Undefined types/symbols
   - Coverage gaps
-  - Parallel task flows sharing files
+  - Pairwise file overlap: any two task flows with NO depends-on edge between them but overlapping Files-to-Create/Modify lists. Add depends-on (force serial) or merge. Verifiable from file lists alone; orchestrate-flow's GROUP later enforces the same at wave granularity.
   - Oversized task flows (>1 day)
+- Stage `flow-storage/tasks/{task-name}/` for preview
+- Compose proposed commit message
 
-**2.2 FINALIZE**
+**Artifacts (presented at gate):**
+- `design/task-design.md`
+- `design/task-technical-design.md`
+- `design/task-edge-cases.md`
+- `design/diagrams/01-class-diagram.puml` + `.svg`
+- `design/diagrams/02-package-diagram.puml` + `.svg`
+- `design/diagrams/03-sequence-{flow}.puml` + `.svg` (if needed)
+- `design/diagrams/04-task-flow-dependencies.puml` + `.svg`
+- Task flow files in `implement/flow-plan/task-flow-{NN}-{name}.md`
+- Staged file list (`git diff --cached --stat`)
+- Proposed commit message
+
+**Gate:** Design + plan review — [A]ccept / [F]eedback / [R]eject  
+*(GATE TYPE C — CRITICAL)*
+
+⚠️ **This is the ONLY gate.** Accepting locks task-design.md immutable per Rule 9 AND triggers Phase 2 (auto-executes FINALIZE + COMMIT). After this point, any change to task-design.md goes in task-technical-design.md instead.
+
+**Failure modes to verify before [A]ccept:**
+- PLAN integrity (any internal check failures from sub-task 1.4 still unresolved?)
+- Anything you'd want to change in task-design.md? Now is the only time.
+- Diagrams cross-referenced correctly from task-design.md?
+- All diagrams rendered: every `.puml` has a sibling `.svg` or `.png`
+- All task flows from 1.4 actually written to disk?
+- Files staged: only `flow-storage/tasks/{task-name}/` contents — no stray edits?
+- Commit message: task name correct? Task flow count matches `flow-plan/`? Summary captures *why* not *what*?
+
+**Opt-out:** `--no-commit` skips Phase 2's commit sub-task (gate still presents; FINALIZE still runs).
+
+---
+
+### Phase 2: LOCK & COMMIT
+
+**Purpose:** Mechanically apply the decisions already reviewed and accepted at Phase 1. No separate gate — the scope was already approved.
+
+**Sub-tasks (auto-execute after Phase 1 [A]ccept):**
+
+**2.1 FINALIZE**
 - Update task-design.md status header:
   ```markdown
   > **Status:** v2.0 (SIGNED OFF)
@@ -131,9 +151,8 @@ This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that
   > **Immutable:** Yes
   ```
 
-**2.3 COMMIT** *(executes only after Phase 2 gate is accepted)*
-- Stage `flow-storage/tasks/{task-name}/` entirely
-- Compose commit message:
+**2.2 COMMIT** *(skipped with --no-commit)*
+- Run `git commit` with the message previewed at Phase 1:
   ```
   design({task-name}): sign off task-design.md and {N} task flows
 
@@ -142,30 +161,6 @@ This flow has **2 phases, 2 gates**. Each phase contains multiple sub-tasks that
   Task flows created: {list, comma-separated}
   Diagrams: class, package, sequence (and any others)
   ```
-- Run `git commit`
-
-**Artifacts (presented at gate):**
-- Task flow files in `implement/flow-plan/task-flow-{NN}-{name}.md`
-- `design/diagrams/04-task-flow-dependencies.puml` + `.svg`
-- task-design.md with sign-off header (not yet committed)
-- Staged file list (`git diff --cached --stat`)
-- Proposed commit message
-
-**Gate:** Plan + final approval — [A]ccept / [F]eedback / [R]eject  
-*(GATE TYPE C — CRITICAL)*
-
-⚠️ Accepting locks task-design.md immutable per Rule 9 AND lands the commit in history. After this point, any change to task-design.md goes in task-technical-design.md instead.
-
-**Failure modes to verify before [A]ccept:**
-- PLAN integrity (any internal check failures from sub-task 2.1 still unresolved?)
-- Anything you'd want to change in task-design.md? Now is the only time.
-- Diagrams cross-referenced correctly from task-design.md?
-- All diagrams rendered: every `.puml` has a sibling `.svg` or `.png`
-- All task flows from 2.1 actually written to disk?
-- Files staged: only `flow-storage/tasks/{task-name}/` contents — no stray edits?
-- Commit message: task name correct? Task flow count matches `flow-plan/`? Summary captures *why* not *what*?
-
-**Opt-out:** `--no-commit` skips sub-task 2.3 (gate still presents; PLAN + FINALIZE still happen). Use when bundling design with adjacent work into one commit.
 
 ---
 
@@ -199,10 +194,9 @@ AI: Generating text documentation from approved diagram...
 
 Users can customize this flow by editing the generated copy in `.ai-workflow/flows/`:
 
-- Add sub-tasks within a phase (e.g., "Security Review" inside Phase 1)
-- Add a third phase if a new gate is genuinely needed (e.g., a separate "Security sign-off" gate before the COMMIT gate)
+- Add sub-tasks within Phase 1 (e.g., "Security Review" before the gate)
 - Remove sub-tasks (e.g., skip sequence diagrams for simple tasks)
 - Change diagram format (Mermaid instead of PlantUML)
 - Add task flow types (e.g., "Migration", "Config")
 
-⚠️ Avoid promoting sub-tasks to top-level phases without a clear reason — each new phase is a new user-facing gate. The 2-gate default is deliberate.
+⚠️ Avoid adding gates without a clear reason — the single-gate cadence is deliberate. Each new gate is a new user-facing interruption.

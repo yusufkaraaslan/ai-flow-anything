@@ -13,6 +13,7 @@ Every profile provides one or more flows. The core set is:
 |--------|---------|-------|--------|
 | **design-flow** | Design tasks with diagrams | Task idea | task-design.md, task-technical-design.md, task-edge-cases.md, diagrams, task flows |
 | **implement-flow** | Implement task flows with validation | Task flow files | Source code, updated task flows (knowledge records) |
+| **orchestrate-flow** | Parallel task flow orchestration | Task name (all task flows) | Merged implementation, consolidated report |
 | **pr-flow** | PR lifecycle management | Completed task flows | Validation report, feedback task flows, lessons learned |
 | **test-flow** | Test planning & execution | Task docs | Test files, coverage report |
 | **deploy-flow** | Deployment & release | Build artifacts | Deployed release, verification report |
@@ -28,12 +29,26 @@ Every flow is composed of **phases**. Phases are sequential, each ending with a 
 
 **Phases vs sub-tasks.** Each phase typically contains multiple sub-tasks (numbered 1.1, 1.2, 1.3, ...). Sub-tasks **auto-proceed** as the agent works — no gate between them. Only the *parent phase* presents a gate when its sub-tasks are complete. This keeps Rule 6 satisfied (every phase ends with a gate) while limiting user-facing interruptions to the small number of meaningful checkpoints per flow.
 
-The default cadence is **2 phases = 2 gates per flow**. Some flows (notably deploy-flow) keep additional phases when each represents a distinct, hard-to-reverse decision.
+The default cadence varies by flow type:
+
+| Flow | Phase 1 gate | Phase 2 gate | Phase 3 gate | Phase 4 gate |
+|------|-------------|-------------|-------------|-------------|
+| design-flow | CRITICAL (only gate) | — (auto) | — | — |
+| implement-flow | STANDARD | CRITICAL | — | — |
+| orchestrate-flow | STANDARD (plan) | — (auto) | CRITICAL (merge) | — (auto) |
+| pr-flow (all modes) | STANDARD | CRITICAL | — | — |
+| test-flow | STANDARD | STANDARD | — | — |
+| docs-flow | STANDARD | CRITICAL | — | — |
+| deploy-flow | CRITICAL | CRITICAL | — | — |
+
+Phases marked `— (auto)` execute automatically after the preceding gate is [A]ccepted — they apply decisions already reviewed and have no separate gate. This eliminates redundant "are you sure about that decision you just approved?" interruptions while keeping critical decision points where they matter.
 
 ### Design Flow Phases
 
+The design flow uses **1 review gate** (CRITICAL) at the end of Phase 1. Phase 2 executes automatically after acceptance — its only purpose is to lock the design immutable and commit. A second gate there would re-review the already-approved content.
+
 ```
-Phase 1: SPECIFY
+Phase 1: DESIGN
   Sub-tasks (auto-proceed):
     1.1 UNDERSTAND
         → Load project context (universal/, profiles/{detected}/,
@@ -56,23 +71,14 @@ Phase 1: SPECIFY
         → Write task-design.md, task-technical-design.md,
           task-edge-cases.md
         → Cross-reference diagrams from sub-task 1.2
-
-  [GATE TYPE B — STANDARD]
-  Design package review: developer sees the diagrams + the three
-  spec docs together and forms one opinion.
-
-Phase 2: COMMIT
-  Sub-tasks (auto-proceed):
-    2.1 PLAN
+    1.4 PLAN
         → Decompose task into implementation task flows
         → Each task flow gets frontmatter (task-flow, task, status,
           depends-on, accepted-date)
         → Each task flow declares Files to Create / Files to Modify
         → Build task flow dependency graph
-        → Internal validation BEFORE the gate (formerly the CRITICAL
-          PLAN gate — now an automatic check). Surface any of these
-          to the developer at the Phase 2 gate so [F]eedback can
-          revise:
+        → Internal validation (surface failures at the Phase 1 gate
+          so [F]eedback can revise):
             - Temporal contradiction: a task flow marked "Files to
               Modify" against a file no prior task flow has "Files
               to Create". Reorder or merge.
@@ -82,39 +88,34 @@ Phase 2: COMMIT
             - Coverage: scan task-design.md sections — is every
               public method, signal, and resource covered by exactly
               one task flow?
-            - Independence: any task flow listed as parallel-with
-              another that actually shares a file? Mark dependent
-              or merge.
+            - Pairwise file overlap: for every pair of task flows
+              with NO depends-on edge between them, do their declared
+              "Files to Create" / "Files to Modify" lists intersect?
+              If yes, either add a depends-on edge (forcing them
+              sequential) or merge them. This is verifiable at design
+              time from the file lists alone — no `parallel-with`
+              field is needed. The orchestrate-flow's GROUP sub-task
+              will later enforce the same property at wave granularity,
+              but catching it here means the developer fixes it once
+              instead of bouncing through the wave plan.
             - Scope creep: any task flow larger than a one-day
               implementation? Split it.
-    2.2 FINALIZE
-        → Sign off task-design.md (status: v1.0 — Signed Off,
-          Immutable: Yes)
-        → Confirm all task flow files written, dep graph diagram
-          generated
-    2.3 COMMIT
-        → Stage flow-storage/tasks/{task-name}/ entirely
-          (design/task-design.md, design/task-technical-design.md,
-          design/task-edge-cases.md, design/diagrams/*.puml + *.svg/*.png,
-          implement/flow-plan/task-flow-*.md)
-        → Compose commit message:
-            design({task-name}): sign off task-design.md and {N} task flows
-
-            {one-line summary of task scope}
-
-            Task flows created: {list, comma-separated}
-            Diagrams: class, package, sequence (and any others)
-        → Run git commit AFTER the gate is accepted
+        → Generate task flow dependency diagram
+        → Stage flow-storage/tasks/{task-name}/ for preview
+        → Compose proposed commit message
 
   [GATE TYPE C — CRITICAL]
-  Plan + final approval: presented BEFORE sub-task 2.3 executes git commit.
-  ⚠️ Accepting locks task-design.md immutable per Rule 9 AND lands the
-  commit in history. This is the only gate where the developer reviews
-  the decomposition AND the final commit set together.
+  Design package review: developer sees the diagrams + spec docs +
+  task flow files + staged diff + commit message together and forms
+  one opinion. This is the ONE AND ONLY gate.
+  
+  ⚠️ Accepting locks task-design.md immutable per Rule 9 AND triggers
+  Phase 2 (auto-executes FINALIZE + COMMIT). After this point, any
+  change to task-design.md goes in task-technical-design.md instead.
 
   Failure modes to verify before [A]ccept:
-    - PLAN integrity (any of the internal check failures from
-      sub-task 2.1 still unresolved?)
+    - PLAN integrity (any internal check failures from sub-task 1.4
+      still unresolved?)
     - Anything you'd want to change in task-design.md? Now is the
       only time. Post-sign-off changes go in task-technical-design.md
       only, never task-design.md.
@@ -126,7 +127,7 @@ Phase 2: COMMIT
               || echo "MISSING IMAGE: $f"
             done`
       Any "MISSING IMAGE" output means render before signing off.
-    - All task flows from sub-task 2.1 actually written to disk?
+    - All task flows from sub-task 1.4 actually written to disk?
     - Files staged: only flow-storage/tasks/{task-name}/ contents — no
       stray edits from other tasks or from .ai-workflow/. Run
       `git diff --cached --stat` and verify.
@@ -135,10 +136,21 @@ Phase 2: COMMIT
     - Hooks won't fail (no linter complaint, no missing files).
 
   Opt-out: developer can pass --no-commit when invoking the flow
-  to skip the git commit sub-task. The gate still presents (the
-  developer still confirms PLAN + FINALIZE), but sub-task 2.3 is
-  skipped. Use when bundling design with adjacent work into a
-  single commit.
+  to skip Phase 2's commit sub-task. The gate still presents, but
+  FINALIZE still runs (design is locked even without commit).
+
+Phase 2: LOCK & COMMIT
+  (Auto-executes after Phase 1 [A]ccept. No separate review gate —
+  the scope was already approved at Phase 1.)
+  
+  Sub-tasks:
+    2.1 FINALIZE
+        → Sign off task-design.md (status: v1.0 — Signed Off,
+          Immutable: Yes). This is a mechanical application of
+          the decision already made at the Phase 1 gate.
+    2.2 COMMIT
+        → Run git commit with the message previewed at Phase 1.
+          Skipped with --no-commit.
 ```
 
 ### Implement Flow Phases
@@ -208,6 +220,170 @@ Phase 2: COMMIT
     - Pre-existing failing tests not silently bypassed?
 
   Opt-out: --no-commit skips sub-task 2.2 (gate still presents).
+```
+
+### Orchestrate Flow Phases
+
+The orchestrate flow processes an entire task's task flows in parallel waves ordered by dependencies. Subagents implement individual task flows in isolated git worktrees; the orchestrator merges results and presents ONE gate at the end. Each subagent uses the implement-flow in **sub-agent mode** (no blocking gates, auto-proceed through all sub-tasks, return an implementation report).
+
+```
+Phase 1: PLAN
+  Sub-tasks (auto-proceed):
+    1.1 LOAD
+        → Read all task flow files from
+          flow-storage/tasks/{task-name}/implement/flow-plan/
+        → Read task-design.md, task-technical-design.md,
+          task-edge-cases.md
+        → Read ARCHITECTURE.md, CONVENTIONS.md, PATTERNS.md
+    1.2 GROUP
+        → Build dependency graph from task flow frontmatter
+          (depends-on field)
+        → Topological sort → compute dependency waves
+        → Group task flows by wave (all task flows in a wave
+          are independent and can run in parallel)
+    1.3 SCHEDULE
+        → Generate execution plan:
+          ```
+          Wave 1 (parallel, 2 task flows):
+            - user-session-store
+            - auth-interfaces
+          Wave 2 (parallel, 2 task flows):
+            - auth-service          (blocked by: user-session-store)
+            - login-form            (blocked by: auth-interfaces)
+          Wave 3 (1 task flow):
+            - api-integration       (blocked by: auth-service, login-form)
+          Wave 4 (1 task flow):
+            - tests                 (blocked by: all)
+          
+          Worktrees: .ai-workflow/worktrees/{task-name}/{task-flow}/
+          ```
+        → Validate wave plan: no two task flows in the same wave
+          share files (from PLAN validation; if they do, mark one
+          dependent on the other)
+
+  [GATE TYPE B — STANDARD]
+  Execution plan review: developer sees the grouped plan with
+  dependency waves. Adjust grouping, reorder, or add/remove task
+  flows via [F]eedback before execution begins.
+
+Phase 2: EXECUTE
+  Sub-tasks (auto-proceed):
+    For each wave (waves run sequentially):
+      2.1 PREPARE WORKTREES
+          → For each task flow in this wave, create a git worktree:
+            git worktree add .ai-workflow/worktrees/{task-name}/{task-flow}/ {base-branch}
+          → Do NOT copy context files. The worktree is a clean
+            checkout of {base-branch} containing every branch-tracked
+            file already (design docs, KB files, .ai-workflow/).
+            Only intervene if .ai-workflow/ is gitignored — see the
+            profile's orchestrate-flow.md for the symlink fallback.
+      2.2 LAUNCH SUBAGENTS (parallel)
+          → For each task flow in this wave, launch one subagent
+            running implement-flow in sub-agent mode.
+          → Subagent receives:
+            - Task flow file path + full content
+            - Design docs relevant to this task flow
+            - Mode: sub-agent (auto-proceed, no [A]/[F]/[R] gates)
+            - Worktree path: /tmp/.../{task-flow}/
+            - Return format: structured implementation report
+          → Subagent follows implement-flow phases:
+            READ → PLAN → IMPLEMENT → AUTO-VALIDATE → DOC-SYNC →
+            UPDATE TASK FLOW → COMMIT (in worktree)
+            All with auto-proceed — no user-facing gates.
+          → Subagent returns: status, files created/modified,
+            commit SHA, test results, deviations, issues.
+      2.3 MONITOR
+          → Track each subagent's progress
+          → On failure: surface error to developer, decide
+            retry / skip / abort (ask developer for non-trivial
+            failures)
+      2.4 WAIT FOR WAVE
+          → All subagents in this wave must complete before
+            the next wave starts.
+          → Collect implementation reports + commit SHAs.
+
+  [No gate between waves — waves auto-advance. The developer can
+   interrupt at any time but no blocking gates in this phase.]
+
+Phase 3: MERGE
+  Sub-tasks (auto-proceed):
+    3.1 COLLECT
+        → Gather implementation reports from all subagents
+        → Gather commit SHAs from all worktrees
+        → Aggregate key findings: test results, deviations,
+          issues encountered
+    3.2 MERGE WORKTREES
+        → For each worktree commit (in dependency order),
+          cherry-pick into the main branch:
+            git cherry-pick <sha> (from worktree)
+        → Resolve merge conflicts:
+          - Auto-resolve trivial conflicts where safe
+          - Surface non-trivial conflicts for developer review
+          - Document every conflict resolution
+    3.3 VALIDATE MERGED
+        → Run full test suite on the merged tree
+        → Run integration checks across task flow boundaries
+        → Verify no regressions against baseline
+        → Check that all acceptance criteria are addressed
+    3.4 UPDATE RECORDS
+        → Transform all task flow files into knowledge records:
+          status: complete, accepted-date set, implementation
+          notes appended
+        → Update task-technical-design.md with deviations
+        → Update task-edge-cases.md with discoveries
+        → Update PATTERNS.md with new patterns
+    3.5 GENERATE REPORT
+        → Consolidated implementation report:
+          - Per-task-flow summary (status, files, commits, tests)
+          - Merge conflicts resolved (with resolutions)
+          - Validation results (pass/fail across all task flows)
+          - Deviations from design
+          - New patterns discovered
+          - Issues requiring follow-up
+
+  [GATE TYPE C — CRITICAL]
+  Final implementation review: developer sees the merged code,
+  the consolidated report, validation results, and all knowledge
+  records. This is the ONE AND ONLY gate after execution.
+  
+  ⚠️ This is the single decision point for the entire feature
+  implementation. Every task flow was implemented by a subagent
+  in a worktree; their work has been cherry-picked into the
+  main branch. Accepting finalizes the merge.
+
+  Failure modes to verify before [A]ccept:
+    - All task flows status: complete with accepted-date set?
+    - Merge conflicts all resolved (no `<<<<<<<` left in tree)?
+    - Full test suite passes (no regressions)?
+    - All acceptance criteria from task-design.md addressed?
+    - task-technical-design.md updated with deviations?
+    - task-edge-cases.md updated with discoveries?
+    - PATTERNS.md updated with new patterns?
+    - Consolidated report captures all key findings?
+    - No stray files from worktrees left in working tree?
+
+Phase 4: COMMIT
+  (Auto-executes after Phase 3 [A]ccept. No separate review gate —
+  the work was already reviewed and accepted at Phase 3.)
+
+  Sub-tasks:
+    4.1 STAGE
+        → Stage all implementation files + updated knowledge records
+    4.2 COMMIT
+        → Final consolidation commit:
+            feat({task-name}): merged parallel implementation — {N} task flows
+
+            Task flows implemented: {list}
+            Merge conflicts resolved: {count, if any}
+            Tests: {passing}/{total}
+        → Run git commit
+        → Clean up worktrees (one per subagent, removed individually
+          since `git worktree remove` takes one path at a time):
+            for wt in .ai-workflow/worktrees/{task-name}/*/; do
+              git worktree remove "$wt"
+            done
+  
+  Opt-out: --no-commit skips 4.2; staged files remain uncommitted.
 ```
 
 ### Docs Flow Phases
@@ -599,7 +775,7 @@ After implement-flow, before PR.
 
 ## Phases
 
-(Following the canonical 2-phase, 2-gate pattern.)
+(Gate cadence: see the gate table under "Phase Architecture" above.)
 
 ### Phase 1: AUDIT *(STANDARD gate)*
 Sub-tasks (auto-proceed):
@@ -619,28 +795,22 @@ Sub-tasks (auto-proceed):
 
 ## Artifact Flow
 
+### Manual sequential path (implement-flow)
+
 ```
 Developer idea
     ↓
 Run design flow for {name}
     ↓
-task-design.md + diagrams (class, package, sequence)
-    ↓
-task-technical-design.md + task-edge-cases.md
-    ↓
-Task flow files (model, controller, view, tests, integration)
+task-design.md + diagrams (class, package, sequence) + task flow files
     ↓
 Run implement flow for {name}, task-flow=model
     ↓
-Model implementation + tests
-    ↓
-Knowledge record (model.md updated)
+Model implementation + tests → knowledge record
     ↓
 Run implement flow for {name}, task-flow=controller
     ↓
-Controller implementation + tests
-    ↓
-Knowledge record (controller.md updated)
+Controller implementation + tests → knowledge record
     ↓
 ... (repeat for all task flows)
     ↓
@@ -657,6 +827,39 @@ Run PR flow for {name}, mode=feedback
 Feedback task flows → fixes → knowledge records
     ↓
 PR merged
+    ↓
+Run PR flow for {name}, mode=capture
+    ↓
+lessons-learned.md + PATTERNS.md updates
+    ↓
+Task complete
+```
+
+### Parallel orchestrated path (orchestrate-flow)
+
+```
+Developer idea
+    ↓
+Run design flow for {name}
+    ↓
+task-design.md + diagrams + task flow files (with dependency graph)
+    ↓
+Run orchestrate flow for {name}
+    ↓
+Phase 1: PLAN → execution plan gate
+    ↓
+Phase 2: EXECUTE
+    ├─ Wave 1 (parallel): model + interfaces     [worktree A] [worktree B]
+    ├─ Wave 2 (parallel): controller + component  [worktree C] [worktree D]
+    └─ Wave 3: tests                               [worktree E]
+    ↓
+Phase 3: MERGE → cherry-pick all worktrees → validate → consolidated report gate
+    ↓
+Phase 4: COMMIT → single consolidation commit
+    ↓
+Run PR flow for {name}, mode=pre-pr
+    ↓
+Validation report → PR → review → feedback → merge
     ↓
 Run PR flow for {name}, mode=capture
     ↓

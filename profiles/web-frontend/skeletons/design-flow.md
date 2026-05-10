@@ -22,29 +22,48 @@ flow-storage/tasks/{task-name}/
 
 ## Phases
 
-This profile follows the canonical **2-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/design-flow.md`). Web-frontend specifics are in the sub-tasks.
+This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes after acceptance — its only purpose is to lock the design and commit. See `universal/workflow-structure.md` for the canonical pattern.
 
-### Phase 1: SPECIFY *(STANDARD gate)*
-- **1.1 UNDERSTAND** — Load context, explore codebase (components/, hooks/, routes/, stores/).
-- **1.2 DESIGN (Visual-First)** — Generate component hierarchy + state flow diagrams (class + package + sequence as needed). Render every `.puml` to `.svg`.
-- **1.3 SPECIFY** — Create docs with **web-frontend specifics**:
+### Phase 1: DESIGN *(CRITICAL gate)*
+
+**Sub-tasks (auto-proceed):**
+
+**1.1 UNDERSTAND** — Load context, explore codebase (components/, hooks/, routes/, stores/).
+
+**1.2 DESIGN (Visual-First)** — Generate component hierarchy + state flow diagrams (class + package + sequence as needed). Render every `.puml` to `.svg`.
+
+**1.3 SPECIFY** — Create docs with **web-frontend specifics**:
   - Component architecture
   - State management
   - API integration
   - Routing
   - Styling approach
   - Accessibility
-- → **Gate 1: Design package review** — diagrams + spec docs together.
 
-### Phase 2: COMMIT *(CRITICAL gate)*
-- **2.1 PLAN** — Decompose into implementation task flows (kebab-case names):
+**1.4 PLAN** — Decompose into implementation task flows (kebab-case names):
   - Examples: `user-auth-hook.md`, `login-form-component.md`, `api-error-handler.md`
   - Create files with frontmatter + tags
   - Generate task-flow dependency diagram
   - Suggested: offer to add `tests.md` as optional task flow
-- **2.2 FINALIZE** — Sign off task-design.md (immutable per Rule 9).
-- **2.3 COMMIT** *(executes only after the gate is accepted)* — Stage `flow-storage/tasks/{task-name}/`; commit `design({task-name}): sign off task-design.md and {N} task flows`. Skip 2.3 if `--no-commit`.
-- → **Gate 2: Plan + final approval** — presented BEFORE 2.3 executes git commit.
+  - Run internal PLAN validation (surface failures at the gate)
+  - Stage for preview + compose commit message
+
+→ **Gate: Design + plan review — [A]ccept / [F]eedback / [R]eject**  
+⚠️ **This is the ONLY gate.** Accepting locks task-design.md immutable per Rule 9 AND triggers Phase 2 (auto-executes FINALIZE + COMMIT). `--no-commit` skips Phase 2's commit.
+
+---
+
+### Phase 2: LOCK & COMMIT
+
+**Purpose:** Mechanically apply the decisions already reviewed and accepted at Phase 1. No separate gate.
+
+**Sub-tasks (auto-execute after Phase 1 [A]ccept):**
+
+**2.1 FINALIZE** — Sign off task-design.md (immutable per Rule 9).
+
+**2.2 COMMIT** *(skipped with --no-commit)* — Stage `flow-storage/tasks/{task-name}/`; commit `design({task-name}): sign off task-design.md and {N} task flows`.
+
+---
 
 ## Frontend Patterns
 

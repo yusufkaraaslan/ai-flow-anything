@@ -221,3 +221,44 @@ Users can customize:
 - Add Unity-specific validations
 - Change component templates
 - Add platform-specific code (mobile input, VR, etc.)
+
+---
+
+## Sub-Agent Mode
+
+When this flow is invoked as a **sub-agent** by the orchestrate-flow, it runs in a different mode:
+
+**Trigger:** The orchestrator passes `mode: sub-agent` in its launch prompt.
+
+**Behavior changes:**
+- **No `[A]/[F]/[R]` gates.** All sub-tasks auto-proceed without user-facing interruption. The orchestrator handles the only gate.
+- **Works in an isolated git worktree** at `.ai-workflow/worktrees/{task-name}/{task-flow}/`.
+- **Commits in the worktree** at the end of Phase 2. Do not push.
+- **Returns a structured implementation report** instead of presenting gate artifacts. Format:
+
+```markdown
+## Sub-Agent Report: {task-flow} ({task-name})
+
+**Status:** success | failure
+**Worktree:** .ai-workflow/worktrees/{task-name}/{task-flow}/
+**Commit SHA:** <sha>
+
+### Files Created
+- path/to/file1
+- path/to/file2
+
+### Files Modified
+- path/to/file3
+
+### Test Results
+- {passing}/{total} passing (EditMode: X, PlayMode: Y)
+- Coverage delta: +X%
+
+### Deviations from Design
+- {deviation 1}
+- {deviation 2}
+
+### Issues Encountered
+- {issue 1}
+- {issue 2}
+```

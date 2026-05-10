@@ -271,6 +271,66 @@ Changes must not break existing features.
 
 ---
 
+## Rule 16: Sub-Agent Gate Suppression
+
+When a flow is invoked as a sub-agent by an orchestrator, internal `[A]/[F]/[R]` gates are suppressed. The sub-agent auto-proceeds through all sub-tasks without user-facing gates and returns a structured report to the orchestrator.
+
+**Enforcement:**
+- The orchestrator passes a `mode: sub-agent` flag in its launch prompt.
+- The sub-agent detects this flag and disables all gate prompts.
+- Gate artifacts (validation results, implementation notes, deviated designs) are wrapped into the sub-agent's return report instead of being presented to the user.
+- The orchestrator evaluates each sub-agent's report and decides whether to surface issues at its own gate.
+
+**Sub-agent return report format:**
+```markdown
+## Sub-Agent Report: {task-flow-name} ({task-name})
+
+**Status:** success | failure
+**Worktree:** .ai-workflow/worktrees/{task-name}/{task-flow}/
+**Commit SHA:** <sha>
+
+### Files Created
+- path/to/file1
+- path/to/file2
+
+### Files Modified
+- path/to/file3
+
+### Test Results
+- {passing}/{total} passing
+- Coverage delta: +X%
+
+### Deviations from Design
+- {deviation 1}
+- {deviation 2}
+
+### Issues Encountered
+- {issue 1}
+- {issue 2}
+```
+
+---
+
+## Rule 17: Git Worktree Isolation
+
+Parallel task flows in the orchestrate-flow use isolated git worktrees. Each sub-agent works in its own worktree to avoid cross-contamination.
+
+**Worktree conventions:**
+- Base path: `.ai-workflow/worktrees/{task-name}/{task-flow}/`
+- Created via: `git worktree add .ai-workflow/worktrees/{task-name}/{task-flow}/ {base-branch}`
+- Each worktree is an independent checkout of the same branch — no sharing files between concurrent subagents.
+- Subagents commit in their worktree as normal (conventional commits per Rule 7).
+- The orchestrator cherry-picks worktree commits into the main branch during Phase 3 MERGE.
+- Worktrees are cleaned up (`git worktree remove`) after the final consolidation commit.
+
+**Guardrails (two-layer enforcement):**
+- **Design-time check** — design-flow Phase 1.4 PLAN validates pairwise file overlap: any two task flows with no `depends-on` between them but overlapping declared file lists must either gain a `depends-on` (forcing serial) or be merged. Verifiable from declared file lists; no `parallel-with` field is required.
+- **Orchestrate-time check** — orchestrate-flow Phase 1.2 GROUP re-validates at wave granularity after computing dependency waves: no two task flows in the same wave may share files. This catches anything the design-time check missed (e.g. files added to the lists after design sign-off).
+- **Last-resort detection** — if both layers missed a conflict, the orchestrator detects it as a cherry-pick merge conflict in Phase 3.2 and surfaces it to the developer at the MERGE gate.
+- **No pushing from worktrees** — subagents commit locally; pushes happen (if at all) from the main worktree after MERGE acceptance.
+
+---
+
 ## Enforcement
 
 These rules are enforced by:
@@ -280,6 +340,6 @@ These rules are enforced by:
 4. **Knowledge base** — Violations recorded in lessons-learned
 
 **Severity levels:**
-- **error** — Must fix before proceeding (Rule 1, 2, 4, 6, 8, 9)
-- **warning** — Should fix, can proceed with justification (Rule 3, 7, 10, 11, 12)
+- **error** — Must fix before proceeding (Rule 1, 2, 4, 6, 8, 9, 16)
+- **warning** — Should fix, can proceed with justification (Rule 3, 7, 10, 11, 12, 17)
 - **info** — Best practice, noted but not blocking (Rule 5, 13, 14, 15)

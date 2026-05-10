@@ -42,5 +42,9 @@ This profile follows the canonical **2-phase, 2-gate** structure from `universal
 - **2.2 COMMIT** *(executes only after the gate is accepted)* — Stage only this task flow's files; commit per conventional commits. Skip 2.2 if `--no-commit`.
 - → **Gate 2: Commit review** — presented BEFORE 2.2 executes git commit.
 
+## Sub-Agent Mode
+
+When invoked by orchestrate-flow, this flow runs in sub-agent mode (no `[A]/[F]/[R]` gates, auto-proceed, works in `.ai-workflow/worktrees/{task-name}/{task-flow}/`, returns a structured report). See canonical: `profiles/generic/skeletons/implement-flow.md` § Sub-Agent Mode and `universal/rules.md` Rule 16. No web-frontend-specific overrides — the same protocol applies.
+
 ## Resume Logic
 Check task flow status.

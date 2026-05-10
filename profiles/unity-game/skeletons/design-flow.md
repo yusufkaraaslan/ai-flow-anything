@@ -46,9 +46,9 @@ flow-storage/tasks/{task-name}/
 
 ## Phases
 
-This profile follows the canonical **2-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/design-flow.md`). Unity-specific details are in the sub-tasks.
+This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes after acceptance — its only purpose is to lock the design and commit. See `universal/workflow-structure.md` for the canonical pattern.
 
-### Phase 1: SPECIFY *(STANDARD gate)*
+### Phase 1: DESIGN *(CRITICAL gate)*
 
 **Sub-tasks (auto-proceed):**
 
@@ -69,15 +69,7 @@ This profile follows the canonical **2-phase, 2-gate** structure from `universal
 - `task-edge-cases.md`: scene loading/unloading, object pooling, null reference risks, performance concerns
 - Sequence diagrams for complex flows (rendered)
 
-→ **Gate 1: Design package review** — diagrams + spec docs together.
-
----
-
-### Phase 2: COMMIT *(CRITICAL gate)*
-
-**Sub-tasks (auto-proceed):**
-
-**2.1 PLAN** — Decompose into implementation task flows (kebab-case names describing the WORK, not architectural layers):
+**1.4 PLAN** — Decompose into implementation task flows (kebab-case names describing the WORK, not architectural layers):
   - Examples: `player-health-system.md`, `enemy-ai-behavior.md`, `inventory-ui-panel.md`, `save-load-system.md`, `vfx-particle-controller.md`
   - Sample plan presentation:
     ```
@@ -102,13 +94,24 @@ This profile follows the canonical **2-phase, 2-gate** structure from `universal
     ---
     ```
   - Define acceptance criteria per task flow
-  - Generate `diagrams/04-task-flow-dependencies.puml` (rendered)
+  - Build dependency graph + generate `diagrams/04-task-flow-dependencies.puml` (rendered)
+  - Run internal PLAN validation (surface failures at the gate)
+  - Stage for preview + compose commit message
 
-**2.2 FINALIZE** — Sign off task-design.md (immutable per Rule 9).
+→ **Gate: Design + plan review — [A]ccept / [F]eedback / [R]eject**  
+⚠️ **This is the ONLY gate.** Accepting locks task-design.md immutable per Rule 9 AND triggers Phase 2 (auto-executes FINALIZE + COMMIT). `--no-commit` skips Phase 2's commit.
 
-**2.3 COMMIT** *(executes only after the gate is accepted)* — Stage `flow-storage/tasks/{task-name}/`; commit `design({task-name}): sign off task-design.md and {N} task flows`. Skip 2.3 if `--no-commit`.
+---
 
-→ **Gate 2: Plan + final approval** — presented BEFORE 2.3 executes git commit.
+### Phase 2: LOCK & COMMIT
+
+**Purpose:** Mechanically apply the decisions already reviewed and accepted at Phase 1. No separate gate.
+
+**Sub-tasks (auto-execute after Phase 1 [A]ccept):**
+
+**2.1 FINALIZE** — Sign off task-design.md (immutable per Rule 9).
+
+**2.2 COMMIT** *(skipped with --no-commit)* — Stage `flow-storage/tasks/{task-name}/`; commit `design({task-name}): sign off task-design.md and {N} task flows`.
 
 ---
 

@@ -165,3 +165,61 @@ Users can customize:
 - Change commit message format in Phase 2 sub-task 2.2 COMMIT
 - Add deployment step after commit
 - Add notification step (Slack, email)
+
+---
+
+## Sub-Agent Mode
+
+When this flow is invoked as a **sub-agent** by the orchestrate-flow, it runs in a different mode:
+
+**Trigger:** The orchestrator passes `mode: sub-agent` in its launch prompt.
+
+**Behavior changes:**
+- **No `[A]/[F]/[R]` gates.** All sub-tasks auto-proceed without user-facing interruption. The gates are suppressed — the orchestrator handles the only gate (Phase 3 MERGE).
+- **Works in an isolated git worktree** at `.ai-workflow/worktrees/{task-name}/{task-flow}/`. Do not modify files outside this worktree.
+- **Commits in the worktree** at the end of Phase 2 (standard conventional commit per Rule 7). Do not push.
+- **Returns a structured implementation report** instead of presenting gate artifacts. Format:
+
+```markdown
+## Sub-Agent Report: {task-flow} ({task-name})
+
+**Status:** success | failure
+**Worktree:** .ai-workflow/worktrees/{task-name}/{task-flow}/
+**Commit SHA:** <sha>
+
+### Files Created
+- path/to/file1
+- path/to/file2
+
+### Files Modified
+- path/to/file3
+
+### Test Results
+- {passing}/{total} passing
+- Coverage delta: +X%
+
+### Deviations from Design
+- {deviation 1}
+- {deviation 2}
+
+### Issues Encountered
+- {issue 1}
+- {issue 2}
+```
+
+**How the orchestrator calls this flow as a sub-agent:**
+```
+You are a sub-agent of the implement-orchestrator for task "{task-name}".
+Your job: implement ONE task flow using implement-flow in sub-agent mode.
+
+Task flow file:
+  flow-storage/tasks/{task-name}/implement/flow-plan/{task-flow-file}.md
+
+Mode: sub-agent
+  - Follow the implement-flow phases (READ → PLAN → IMPLEMENT →
+    AUTO-VALIDATE → DOC-SYNC → UPDATE TASK FLOW → COMMIT).
+  - Auto-proceed through ALL sub-tasks. Do NOT present [A]/[F]/[R] gates.
+  - Work in your git worktree: .ai-workflow/worktrees/{task-name}/{task-flow}/
+  - Commit in your worktree when done.
+  - Return the structured implementation report when complete.
+```
