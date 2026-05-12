@@ -145,7 +145,7 @@ Phase 2: LOCK & COMMIT
   
   Sub-tasks:
     2.1 FINALIZE
-        → Sign off task-design.md (status: v1.0 — Signed Off,
+        → Sign off task-design.md (status: v2.0 (SIGNED OFF),
           Immutable: Yes). This is a mechanical application of
           the decision already made at the Phase 1 gate.
     2.2 COMMIT
@@ -284,7 +284,7 @@ Phase 2: EXECUTE
             - Task flow file path + full content
             - Design docs relevant to this task flow
             - Mode: sub-agent (auto-proceed, no [A]/[F]/[R] gates)
-            - Worktree path: /tmp/.../{task-flow}/
+            - Worktree path: .ai-workflow/worktrees/{task-name}/{task-flow}/
             - Return format: structured implementation report
           → Subagent follows implement-flow phases:
             READ → PLAN → IMPLEMENT → AUTO-VALIDATE → DOC-SYNC →

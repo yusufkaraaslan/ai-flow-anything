@@ -26,7 +26,7 @@ Load the `implement-flow` skill (or read `.ai-workflow/flows/implement-flow.md` 
 - → **Gate 2: Commit review** — presented BEFORE 2.2 executes git commit.
 
 Hard preconditions — **STOP** and refuse to proceed if any fail:
-- `flow-storage/tasks/{task-name}/design/task-design.md` exists and is signed off (status: v1.0 — Signed Off, Immutable: Yes). If not, tell the developer to run `/design-flow {task-name}` first.
+- `flow-storage/tasks/{task-name}/design/task-design.md` exists and is signed off (status: v2.0 (SIGNED OFF)). If not, tell the developer to run `/design-flow {task-name}` first.
 - The target task flow file exists with `status: pending` or `status: in_progress`.
 - The user's global rule "never skip any test" applies to sub-task 1.4 — failing tests do not auto-proceed; they surface at Gate 1.
 

@@ -368,6 +368,45 @@ orchestrate-flow needs the host AI tool to support **two** things:
 
 **For OpenCode users:** prototype with two parallel subagents on a 2-task-flow task before running orchestrate-flow on real work. If the subagents step on each other's files, fall back to sequential implement-flow until OpenCode documents per-subagent CWD support.
 
+---
+
+## Resume Logic
+
+If orchestrate-flow was interrupted (subagent crash, developer abort, session timeout):
+
+1. Read all task flow files in `flow-storage/tasks/{task-name}/implement/flow-plan/`
+2. Check for existing worktrees: `git worktree list | grep worktrees/{task-name}/`
+3. Determine last completed wave by task flow status:
+
+```
+Orchestration Status: {task-name}
+
+Wave 1 (2/2 complete):
+  ✓ user-session-store    complete   commit a1b2c3d
+  ✓ auth-interfaces       complete   commit e4f5g6h
+Wave 2 (1/2 complete):
+  ✓ auth-service          complete   commit i7j8k9l
+  ✗ login-form             pending   (worktree intact)
+Wave 3 (pending):          (blocked by: Wave 2)
+  - api-integration        pending
+Wave 4 (pending):          (blocked by: Wave 3)
+  - tests                  pending
+
+Progress: 3/5 complete
+
+Resuming: login-form (in Wave 2, worktree intact)
+Or: re-run orchestrate-flow from scratch (--restart)
+```
+
+**Resume strategy:**
+- If all task flows are `status: complete`, skip to Phase 3 MERGE
+- If a wave is partially complete, resume from the pending task flows in that wave
+- If a worktree exists for a pending task flow, reuse it (don't recreate)
+- If the main working tree has uncommitted cherry-picks from a prior partial merge, `git cherry-pick --abort` before resuming
+- If `--restart`, remove all worktrees (`git worktree remove <path>` for each) and start from Phase 1
+
+---
+
 ## Customization
 
 Users can customize:

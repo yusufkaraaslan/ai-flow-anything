@@ -132,7 +132,7 @@ This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes aft
 - Files staged: only `flow-storage/tasks/{task-name}/` contents — no stray edits?
 - Commit message: task name correct? Task flow count matches `flow-plan/`? Summary captures *why* not *what*?
 
-**Opt-out:** `--no-commit` skips Phase 2's commit sub-task (gate still presents; FINALIZE still runs).
+**Opt-out:** `--no-commit` skips Phase 2's commit sub-task. FINALIZE (sign-off + lock) still runs regardless — the design is always locked at this point per Rule 9.
 
 ---
 

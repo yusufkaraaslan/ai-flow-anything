@@ -142,10 +142,11 @@ accepted-date: null       # set when developer accepts implementation
 
 **Fields:**
 `task-flow` — Short identifier (kebab-case, e.g., user-session, auth-service, login-form)
-- `task-name` — Full task name (kebab-case or PascalCase)
+- `task` — Full task name (kebab-case or PascalCase)
 - `status` — Current state
 - `depends-on` — List of task flow names this depends on
 - `accepted-date` — Date of developer acceptance (ISO 8601)
+- `tags` — Optional list of tags (e.g., `["backend", "data-model"]`)
 
 ---
 
@@ -154,7 +155,7 @@ accepted-date: null       # set when developer accepts implementation
 After developer accepts task-design.md, it becomes immutable:
 
 ```markdown
-> **Status:** v2.0 (ENHANCED) — Signed Off
+> **Status:** v2.0 (SIGNED OFF)
 > **Signed Off By:** {developer name}
 > **Date:** {date}
 > **Immutable:** Yes

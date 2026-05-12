@@ -66,10 +66,9 @@ flow-storage/tasks/{task-name}/
 **Purpose:** Complete design specification for the task.
 
 **Status lifecycle:**
-- `Draft` — Initial creation
-- `In Review` — Developer reviewing
-- `v1.0 (ENHANCED)` — After design-flow enhancement
-- `v2.0 (SIGNED OFF)` — After developer approval (IMMUTABLE)
+- `Draft` — Initial creation by design-flow Phase 1
+- `In Review` — Presented at the Phase 1 gate for developer feedback
+- `v2.0 (SIGNED OFF)` — After [A]ccept at the Phase 1 gate (IMMUTABLE)
 
 **Sections (example):**
 1. Overview

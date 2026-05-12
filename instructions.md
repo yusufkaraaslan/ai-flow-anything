@@ -279,13 +279,14 @@ When acting on any ai-flow-anything intent, read files in this order. Paths are 
 
 ```
 1. universal/rules.md                    (always)
-2. profiles/{detected}/README.md         (after detection)
-3. profiles/{detected}/discovery.md      (after detection)
-4. profiles/{detected}/rules.md          (after detection)
-5. profiles/{detected}/skeletons/*.md    (during generation)
-6. universal/diagram-standards.md        (when generating diagrams)
-7. universal/knowledge-base-spec.md      (when creating KB)
-8. .ai-workflow/rules.md                 (if present — project-specific overrides, layered last)
+2. universal/workflow-structure.md       (always — phase architecture)
+3. profiles/{detected}/README.md         (after detection)
+4. profiles/{detected}/discovery.md      (after detection)
+5. profiles/{detected}/rules.md          (after detection)
+6. profiles/{detected}/skeletons/*.md    (during generation)
+7. universal/diagram-standards.md        (when generating diagrams)
+8. universal/knowledge-base-spec.md      (when creating KB)
+9. .ai-workflow/rules.md                 (if present — project-specific overrides, layered last)
 ```
 
 ---
