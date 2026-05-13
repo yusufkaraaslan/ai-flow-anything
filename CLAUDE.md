@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ai-flow-anything is a markdown-only project. There is no code, no build system, no test suite, no CLI.**
 
+> **Naming note:** The repo directory is `magic-seed/` (legacy name from before commit `d3e775c`). The product, the brand, and every user-facing reference is **ai-flow-anything**. Don't rename the directory — just be aware the two names refer to the same thing.
+
 It is a *workflow generator* whose runtime is the AI itself. All artifacts are prose markdown files that an AI assistant reads and acts on. ai-flow-anything is platform-agnostic: the workflow logic lives in `instructions.md` at the repo root, and per-platform wrappers in `platforms/{tool}/` adapt that logic to each AI's discovery and trigger conventions (Claude Code skill YAML, Cursor `.mdc` rules, GitHub Copilot always-on instructions, OpenCode skills, Kimi Code `AGENTS.md`).
 
 When a user installs ai-flow-anything and asks the AI to initialize it, the AI:
@@ -49,7 +51,7 @@ Each profile MUST have these four files (the system reads them by name):
 
 Existing profiles: `generic` (low-confidence fallback), `godot-game`, `unity-game`, `web-frontend`, `backend-api`, `mobile-app`.
 
-**Note:** Each profile also contains an empty `{skeletons}/` directory (literal name with braces) alongside the real `skeletons/`. These appear to be template-rendering leftovers; if you create a new profile by copying an existing one, leave them or delete them — they're not referenced by `instructions.md` or any wrapper.
+Non-generic profiles use the *defer pattern*: their skeletons are short overlays that point at `profiles/generic/skeletons/{flow}.md` for canonical structure. Step 7.2 of `instructions.md` therefore installs `profiles/generic/` alongside the detected profile. Don't duplicate canonical content into slim profiles.
 
 ### Platform layer (`platforms/{tool}/`)
 
@@ -57,10 +59,10 @@ Each platform wrapper packages the universal workflow for a specific AI tool. Wr
 
 | Tool | Wrapper file | Install target | Trigger model |
 |------|-------------|----------------|---------------|
-| Claude Code | `platforms/claude/SKILL.md` | `.claude/skills/ai-flow-anything/SKILL.md` | YAML `description` matches user request |
+| Claude Code | `platforms/claude/SKILL.md` (master) + `flow-skills/orchestrate-flow/SKILL.md` + `agents/orchestrate-implementer.md` + `commands/orchestrate-flow.md` | `.claude/skills/ai-flow-anything/SKILL.md` + `.claude/skills/orchestrate-flow/SKILL.md` + `.claude/agents/orchestrate-implementer.md` + `.claude/commands/orchestrate-flow.md` | Master skill loaded by `description`; orchestrate-flow ships a dedicated per-flow skill, a custom subagent with `isolation: worktree` (auto-creates `.claude/worktrees/<id>/` per parallel call), and a slash command. Other flows use the master skill only. |
 | Cursor | `platforms/cursor/ai-flow-anything.mdc` | `.cursor/rules/ai-flow-anything.mdc` | "Apply Intelligently" — agent reads `description` |
 | GitHub Copilot | `platforms/github-copilot/copilot-instructions.md` | `.github/copilot-instructions.md` | Always-on |
-| OpenCode | `platforms/opencode/SKILL.md` | `.opencode/skills/ai-flow-anything/SKILL.md` | Skill loaded on demand by `description` |
+| OpenCode | `platforms/opencode/SKILL.md` + `flow-skills/{flow}/` + `commands/{flow}.md` | `.opencode/skills/ai-flow-anything/` + `.opencode/skills/{flow}/` + `.opencode/commands/{flow}.md` | Master skill loaded by `description`; per-flow skills give picker discoverability; slash commands give direct invocation |
 | Kimi Code CLI | `platforms/kimi-code/AGENTS.md` | `AGENTS.md` (project root) | Manual reference today (`@AGENTS.md`); auto-load pending upstream |
 
 Each wrapper directory also has a `README.md` documenting the install path, symlink-vs-copy options, append-don't-overwrite paths for projects with conflicting files, and any platform-specific caveats.
