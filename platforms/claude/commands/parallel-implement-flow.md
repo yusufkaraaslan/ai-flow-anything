@@ -1,17 +1,17 @@
 ---
-description: Orchestrate parallel implementation of ALL task flows for a task using git worktrees and parallel Claude Code subagents. Run after design-flow. Use when the task has 3+ task flows with independent subsets.
+description: Run parallel implementation of ALL task flows for a task using git worktrees and parallel Claude Code subagents. Run after design-flow. Use when the task has 3+ task flows with independent subsets.
 argument-hint: <task-name> [--no-commit]
 ---
 
-# /orchestrate-flow
+# /parallel-implement-flow
 
-Runs the **parallel orchestration flow** for a task. Loads `.ai-workflow/flows/orchestrate-flow.md` and executes it.
+Runs the **parallel-implement flow** for a task. Loads `.ai-workflow/flows/parallel-implement-flow.md` and executes it.
 
 ## Usage
 
 ```
-/orchestrate-flow user-authentication
-/orchestrate-flow shield-power-up --no-commit
+/parallel-implement-flow user-authentication
+/parallel-implement-flow shield-power-up --no-commit
 ```
 
 ## Prerequisites
@@ -19,7 +19,7 @@ Runs the **parallel orchestration flow** for a task. Loads `.ai-workflow/flows/o
 - Task must have a signed-off `flow-storage/tasks/{task-name}/design/task-design.md` (run `/design-flow` first)
 - Task flow files must exist in `flow-storage/tasks/{task-name}/implement/flow-plan/` with `depends-on` frontmatter
 - Git worktree support must be available
-- `.claude/agents/orchestrate-implementer.md` must be installed (auto-installed by `/ai-flow-anything init`; verify the Agent tool lists `orchestrate-implementer` as a `subagent_type`)
+- `.claude/agents/parallel-implementer.md` must be installed (auto-installed by `/ai-flow-anything init`; verify the Agent tool lists `parallel-implementer` as a `subagent_type`)
 - Working directory must be clean (`git status` reports no changes)
 
 ## Phases
@@ -27,18 +27,18 @@ Runs the **parallel orchestration flow** for a task. Loads `.ai-workflow/flows/o
 | Phase | Action | Gate |
 |-------|--------|------|
 | 1. PLAN | Group task flows into dependency waves, present execution plan | [A]/[F]/[R] STANDARD |
-| 2. EXECUTE | Launch `orchestrate-implementer` subagents in parallel per wave (auto-worktree via `isolation: worktree`) | Auto (no gate) |
+| 2. EXECUTE | Launch `parallel-implementer` subagents in parallel per wave (auto-worktree via `isolation: worktree`) | Auto (no gate) |
 | 3. MERGE | Cherry-pick subagent commits, resolve conflicts, validate, generate report | [A]/[F]/[R] CRITICAL |
 | 4. COMMIT | Stage and commit; sub-agent branches stay until manual prune | Auto (no gate) |
 
 ## How parallelism works on Claude Code
 
-Phase 2.2 issues N Agent-tool calls in a single message, all with `subagent_type: orchestrate-implementer`. Claude Code dispatches them concurrently, each in its own auto-created worktree under `.claude/worktrees/orchestrate-implementer-<id>/`. The parent receives all reports when the last subagent in the wave finishes, then proceeds to the next wave.
+Phase 2.2 issues N Agent-tool calls in a single message, all with `subagent_type: parallel-implementer`. Claude Code dispatches them concurrently, each in its own auto-created worktree under `.claude/worktrees/parallel-implementer-<id>/`. The parent receives all reports when the last subagent in the wave finishes, then proceeds to the next wave.
 
 ## Example
 
 ```
-/orchestrate-flow user-authentication
+/parallel-implement-flow user-authentication
 
 → Phase 1: PLAN
   Wave 1: user-session-store, auth-interfaces       [2 parallel]
@@ -62,4 +62,4 @@ Phase 2.2 issues N Agent-tool calls in a single message, all with `subagent_type
   [A]ccept / [F]eedback / [R]eject?
 ```
 
-For the full flow, see `.ai-workflow/flows/orchestrate-flow.md`. For Claude-specific phase notes (the auto-worktree behaviour, the cherry-pick branch lookup), see `.ai-workflow/platforms/claude/flow-skills/orchestrate-flow/SKILL.md` or its installed copy at `.claude/skills/orchestrate-flow/SKILL.md`.
+For the full flow, see `.ai-workflow/flows/parallel-implement-flow.md`. For Claude-specific phase notes (the auto-worktree behaviour, the cherry-pick branch lookup), see `.ai-workflow/platforms/claude/flow-skills/parallel-implement-flow/SKILL.md` or its installed copy at `.claude/skills/parallel-implement-flow/SKILL.md`.

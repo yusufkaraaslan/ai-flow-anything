@@ -101,7 +101,7 @@ This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes aft
   - Temporal contradictions in deps
   - Undefined types/symbols
   - Coverage gaps
-  - Pairwise file overlap: any two task flows with NO depends-on edge between them but overlapping Files-to-Create/Modify lists. Add depends-on (force serial) or merge. Verifiable from file lists alone; orchestrate-flow's GROUP later enforces the same at wave granularity.
+  - Pairwise file overlap: any two task flows with NO depends-on edge between them but overlapping Files-to-Create/Modify lists. Add depends-on (force serial) or merge. Verifiable from file lists alone; parallel-implement-flow's GROUP later enforces the same at wave granularity.
   - Oversized task flows (>1 day)
 - Stage `flow-storage/tasks/{task-name}/` for preview
 - Compose proposed commit message

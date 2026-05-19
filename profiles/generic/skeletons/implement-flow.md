@@ -170,12 +170,12 @@ Users can customize:
 
 ## Sub-Agent Mode
 
-When this flow is invoked as a **sub-agent** by the orchestrate-flow, it runs in a different mode:
+When this flow is invoked as a **sub-agent** by the parallel-implement-flow, it runs in a different mode:
 
-**Trigger:** The orchestrator passes `mode: sub-agent` in its launch prompt.
+**Trigger:** Parallel-implement-flow passes `mode: sub-agent` in its launch prompt.
 
 **Behavior changes:**
-- **No `[A]/[F]/[R]` gates.** All sub-tasks auto-proceed without user-facing interruption. The gates are suppressed — the orchestrator handles the only gate (Phase 3 MERGE).
+- **No `[A]/[F]/[R]` gates.** All sub-tasks auto-proceed without user-facing interruption. The gates are suppressed — parallel-implement-flow handles the only gate (Phase 3 MERGE).
 - **Works in an isolated git worktree** at `.ai-workflow/worktrees/{task-name}/{task-flow}/`. Do not modify files outside this worktree.
 - **Commits in the worktree** at the end of Phase 2 (standard conventional commit per Rule 7). Do not push.
 - **Returns a structured implementation report** instead of presenting gate artifacts. Format:
@@ -207,9 +207,9 @@ When this flow is invoked as a **sub-agent** by the orchestrate-flow, it runs in
 - {issue 2}
 ```
 
-**How the orchestrator calls this flow as a sub-agent:**
+**How parallel-implement-flow calls this flow as a sub-agent:**
 ```
-You are a sub-agent of the implement-orchestrator for task "{task-name}".
+You are a sub-agent of the parallel-implement-flow for task "{task-name}".
 Your job: implement ONE task flow using implement-flow in sub-agent mode.
 
 Task flow file:

@@ -1,4 +1,4 @@
-# Flow: Orchestrate
+# Flow: Parallel Implement
 
 > **Profile:** Unity Game
 
@@ -9,7 +9,7 @@ After design-flow when the task has 3+ task flows with independent subsets and y
 
 ## Phases
 
-This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/orchestrate-flow.md`). Unity-specific notes below.
+This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/parallel-implement-flow.md`). Unity-specific notes below.
 
 ### Phase 1: PLAN *(STANDARD gate)*
 - **1.1 LOAD / 1.2 GROUP / 1.3 SCHEDULE** — see canonical.
@@ -35,7 +35,7 @@ This profile follows the canonical **4-phase, 2-gate** structure from `universal
     -runTests -testPlatform EditMode \
     -testResults TestResults.xml -quit
   ```
-  PlayMode tests are skipped during orchestration — run them in a final sequential pass after MERGE acceptance.
+  PlayMode tests are skipped during parallel implementation — run them in a final sequential pass after MERGE acceptance.
 
 → **Gate 2: Final implementation review.**
 

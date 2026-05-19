@@ -1,6 +1,6 @@
 ---
 name: ai-flow-anything
-description: Orchestrator skill for the ai-flow-anything task-development workflow. Use this skill ONLY for (a) initializing ai-flow-anything in a new project, (b) showing project workflow status across in-flight tasks, (c) searching the project knowledge base, or (d) when the developer's request is ambiguous about which phase flow applies. For specific phase work — design, implement, free, orchestrate, test, PR validation, deploy, docs — prefer the dedicated per-flow skills (design-flow, implement-flow, free-flow, orchestrate-flow, pr-flow, test-flow, deploy-flow, docs-flow). ai-flow-anything enforces design-before-code: no task code without a signed-off task-design.md.
+description: Orchestrator skill for the ai-flow-anything task-development workflow. Use this skill ONLY for (a) initializing ai-flow-anything in a new project, (b) showing project workflow status across in-flight tasks, (c) searching the project knowledge base, or (d) when the developer's request is ambiguous about which phase flow applies. For specific phase work — design, implement, free, parallel-implement, test, PR validation, deploy, docs — prefer the dedicated per-flow skills (design-flow, implement-flow, free-flow, parallel-implement-flow, pr-flow, test-flow, deploy-flow, docs-flow). ai-flow-anything enforces design-before-code: no task code without a signed-off task-design.md.
 license: MIT
 metadata:
   audience: developers
@@ -24,7 +24,7 @@ OpenCode loads this skill on demand based on the `description` above. Typical tr
 - "Design a task called <name>"
 - "Implement the next task flow for <task>"
 - "Quick fix <issue>" / "Bug fix" / "Tweak <thing>" / "Hotfix" / "Small change"
-- "Orchestrate all task flows for <task>"
+- "Implement all task flows for <task> in parallel" / "Build everything for <task> in parallel"
 - "Validate <task> for PR"
 - "Process PR feedback for <task>"
 - "Capture lessons learned for <task>"

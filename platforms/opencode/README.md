@@ -12,9 +12,9 @@ Install ai-flow-anything for use with [OpenCode](https://opencode.ai).
 |---|---|---|
 | `ai-flow-anything` | `platforms/opencode/SKILL.md` | Orchestrator — init, status, knowledge-base search, ambiguous requests |
 | `design-flow` | `platforms/opencode/flow-skills/design-flow/SKILL.md` | Phase: design (task-design.md, task-technical-design.md, diagrams, task flows) |
-| `implement-flow` | `platforms/opencode/flow-skills/implement-flow/SKILL.md` | Phase: implement one task flow (also sub-agent mode for orchestrator) |
+| `implement-flow` | `platforms/opencode/flow-skills/implement-flow/SKILL.md` | Phase: implement one task flow (also sub-agent mode for parallel-implement-flow) |
 | `free-flow` | `platforms/opencode/flow-skills/free-flow/SKILL.md` | Phase: quick fix — bug fixes, tweaks, small refactors (3-phase TALK → PLAN → FIX) |
-| `orchestrate-flow` | `platforms/opencode/flow-skills/orchestrate-flow/SKILL.md` | Phase: parallel orchestration of all task flows via worktrees + subagents |
+| `parallel-implement-flow` | `platforms/opencode/flow-skills/parallel-implement-flow/SKILL.md` | Phase: parallel implementation of all task flows via worktrees + subagents |
 | `pr-flow` | `platforms/opencode/flow-skills/pr-flow/SKILL.md` | Phase: PR validation, feedback, post-merge capture |
 | `test-flow` | `platforms/opencode/flow-skills/test-flow/SKILL.md` | Phase: tests |
 | `deploy-flow` | `platforms/opencode/flow-skills/deploy-flow/SKILL.md` | Phase: build/export/release |
@@ -29,7 +29,7 @@ Each flow skill has an imperative description naming its trigger phrases. The ag
 | `/design-flow <task>` | `platforms/opencode/commands/design-flow.md` | Run design-flow for a task |
 | `/implement-flow <task> [task-flow]` | `platforms/opencode/commands/implement-flow.md` | Implement one task flow from a designed task |
 | `/free-flow <issue>` | `platforms/opencode/commands/free-flow.md` | Quick fix, bug fix, tweak, hotfix, small refactor |
-| `/orchestrate-flow <task>` | `platforms/opencode/commands/orchestrate-flow.md` | Orchestrate all task flows in parallel |
+| `/parallel-implement-flow <task>` | `platforms/opencode/commands/parallel-implement-flow.md` | Implement all task flows in parallel |
 | `/test-flow [task]` | `platforms/opencode/commands/test-flow.md` | Run or add tests |
 | `/pr-flow <task> [mode]` | `platforms/opencode/commands/pr-flow.md` | Pre-PR validation, feedback, or capture |
 | `/deploy-flow [task]` | `platforms/opencode/commands/deploy-flow.md` | Build verification + smoke test |
@@ -51,7 +51,7 @@ From your project root:
 git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
 
 # Install 9 skills + 8 commands as symlinks (preferred):
-for skill in ai-flow-anything design-flow implement-flow free-flow orchestrate-flow pr-flow test-flow deploy-flow docs-flow; do
+for skill in ai-flow-anything design-flow implement-flow free-flow parallel-implement-flow pr-flow test-flow deploy-flow docs-flow; do
   mkdir -p ".opencode/skills/$skill"
   if [ "$skill" = "ai-flow-anything" ]; then
     ln -s "../../../.ai-workflow/platforms/opencode/SKILL.md" ".opencode/skills/$skill/SKILL.md"
@@ -61,7 +61,7 @@ for skill in ai-flow-anything design-flow implement-flow free-flow orchestrate-f
 done
 
 mkdir -p ".opencode/commands"
-for cmd in design-flow implement-flow free-flow orchestrate-flow test-flow pr-flow deploy-flow docs-flow; do
+for cmd in design-flow implement-flow free-flow parallel-implement-flow test-flow pr-flow deploy-flow docs-flow; do
   ln -s "../../.ai-workflow/platforms/opencode/commands/$cmd.md" ".opencode/commands/$cmd.md"
 done
 ```
@@ -69,7 +69,7 @@ done
 Symlinks let `git pull` in `.ai-workflow/` update every wrapper automatically. If your environment doesn't support symlinks, replace `ln -s` with `cp`:
 
 ```bash
-for skill in ai-flow-anything design-flow implement-flow free-flow orchestrate-flow pr-flow test-flow deploy-flow docs-flow; do
+for skill in ai-flow-anything design-flow implement-flow free-flow parallel-implement-flow pr-flow test-flow deploy-flow docs-flow; do
   mkdir -p ".opencode/skills/$skill"
   if [ "$skill" = "ai-flow-anything" ]; then
     cp ".ai-workflow/platforms/opencode/SKILL.md" ".opencode/skills/$skill/SKILL.md"
@@ -79,7 +79,7 @@ for skill in ai-flow-anything design-flow implement-flow free-flow orchestrate-f
 done
 
 mkdir -p ".opencode/commands"
-for cmd in design-flow implement-flow free-flow orchestrate-flow test-flow pr-flow deploy-flow docs-flow; do
+for cmd in design-flow implement-flow free-flow parallel-implement-flow test-flow pr-flow deploy-flow docs-flow; do
   cp ".ai-workflow/platforms/opencode/commands/$cmd.md" ".opencode/commands/$cmd.md"
 done
 ```

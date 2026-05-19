@@ -1,15 +1,15 @@
-# Flow: Orchestrate
+# Flow: Parallel Implement
 
 > **Profile:** Generic  
-> **Purpose:** Orchestrate parallel implementation of all task flows for a task using isolated git worktrees and subagents.
+> **Purpose:** Coordinate parallel implementation of all task flows for a task using isolated git worktrees and subagents.
 
 ---
 
 ## When to Use
 
-After design-flow has completed and all task flows are planned with their dependency graph. Use orchestrate-flow to implement the entire task in parallel waves instead of running implement-flow once per task flow.
+After design-flow has completed and all task flows are planned with their dependency graph. Use parallel-implement-flow to implement the entire task in parallel waves instead of running implement-flow once per task flow.
 
-**Choose orchestrate-flow when:**
+**Choose parallel-implement-flow when:**
 - The task has 3+ task flows with independent subsets
 - You want to minimize wall-clock time by parallelizing independent work
 - You want a single consolidated review gate for the entire feature
@@ -38,11 +38,11 @@ After design-flow has completed and all task flows are planned with their depend
 - Task flow files exist with dependency graph (depends-on frontmatter)
 - Git worktree support available (`git worktree --help`)
 - **Working directory clean.** Run `git status`. If anything is staged or unstaged, STOP and offer the developer:
-  > Your working directory has uncommitted changes. orchestrate-flow's MERGE phase cherry-picks worktree commits into the main branch — that step is unsafe with a dirty WD (cherry-pick may refuse, may silently tangle your changes with the orchestrator's, or may overwrite work on `git checkout`).
+  > Your working directory has uncommitted changes. parallel-implement-flow's MERGE phase cherry-picks worktree commits into the main branch — that step is unsafe with a dirty WD (cherry-pick may refuse, may silently tangle your changes with the parent flow's, or may overwrite work on `git checkout`).
   >
   > Options:
-  >   [S]tash — `git stash push -m "pre-orchestrate {task-name}"`; resume after MERGE accept; you re-apply with `git stash pop`.
-  >   [C]ommit — commit your in-flight work first, then run orchestrate-flow.
+  >   [S]tash — `git stash push -m "pre-parallel-implement {task-name}"`; resume after MERGE accept; you re-apply with `git stash pop`.
+  >   [C]ommit — commit your in-flight work first, then run parallel-implement-flow.
   >   [A]bort — exit; clean up manually before re-running.
   
   Do not auto-proceed. Wait for explicit choice.
@@ -123,7 +123,7 @@ For each wave (sequential — waves run in order):
 
 **2.1 PREPARE WORKTREES**
 
-> **Claude Code shortcut:** if the host tool is Claude Code AND the `orchestrate-implementer` subagent is installed at `.claude/agents/orchestrate-implementer.md` with `isolation: worktree` in its frontmatter, **skip this entire sub-task**. Claude Code's `isolation: worktree` auto-creates a fresh worktree under `.claude/worktrees/orchestrate-implementer-<id>/` for each Agent-tool invocation in Phase 2.2 — you do not allocate paths in advance, you do not run `git worktree add`, and you do not need to know the worktree paths until each subagent reports back. Jump to 2.2. The rest of this sub-task applies only to platforms without auto-worktree subagent support (OpenCode, manual fallbacks).
+> **Claude Code shortcut:** if the host tool is Claude Code AND the `parallel-implementer` subagent is installed at `.claude/agents/parallel-implementer.md` with `isolation: worktree` in its frontmatter, **skip this entire sub-task**. Claude Code's `isolation: worktree` auto-creates a fresh worktree under `.claude/worktrees/parallel-implementer-<id>/` for each Agent-tool invocation in Phase 2.2 — you do not allocate paths in advance, you do not run `git worktree add`, and you do not need to know the worktree paths until each subagent reports back. Jump to 2.2. The rest of this sub-task applies only to platforms without auto-worktree subagent support (OpenCode, manual fallbacks).
 
 - For each task flow in the current wave, create an isolated git worktree:
   ```
@@ -139,12 +139,12 @@ For each wave (sequential — waves run in order):
 
 **2.2 LAUNCH SUBAGENTS (parallel)**
 - For each task flow in the wave, launch one subagent.
-- **Claude Code:** issue N Agent-tool calls **in a single message**, all with `subagent_type: orchestrate-implementer`. Claude Code dispatches them concurrently and auto-isolates each in its own worktree (per the subagent's `isolation: worktree` frontmatter). Control returns to the parent only when *all* N have completed — this also satisfies sub-task 2.4 WAIT FOR WAVE for free.
+- **Claude Code:** issue N Agent-tool calls **in a single message**, all with `subagent_type: parallel-implementer`. Claude Code dispatches them concurrently and auto-isolates each in its own worktree (per the subagent's `isolation: worktree` frontmatter). Control returns to the parent only when *all* N have completed — this also satisfies sub-task 2.4 WAIT FOR WAVE for free.
 - **OpenCode / manual:** launch via the platform's parallel-task mechanism (OpenCode Task tool with the General subagent, etc.) and pass the worktree path explicitly so the subagent stays inside it. See § Platform Requirements for the fallback pattern.
 - Subagent invocation (platform-specific; the canonical prompt is below):
 
   ```
-  You are a sub-agent of the implement-orchestrator for task "{task-name}".
+  You are a sub-agent of the parallel-implement-flow for task "{task-name}".
   Your job: implement ONE task flow using implement-flow in sub-agent mode.
 
   Task flow file:
@@ -154,7 +154,7 @@ For each wave (sequential — waves run in order):
     - Follow the implement-flow phases (READ → PLAN → IMPLEMENT →
       AUTO-VALIDATE → DOC-SYNC → UPDATE TASK FLOW → COMMIT) but
       auto-proceed through ALL sub-tasks.
-    - Do NOT present [A]/[F]/[R] gates. The orchestrator handles
+    - Do NOT present [A]/[F]/[R] gates. The parent flow handles
       the only gate (Phase 3 MERGE).
     - Work in your git worktree at:
       .ai-workflow/worktrees/{task-name}/{task-flow}/
@@ -176,7 +176,7 @@ For each wave (sequential — waves run in order):
 - Track each subagent's progress (display per-wave status)
 - On subagent failure:
   - Surface the error + the subagent's report
-  - Ask developer: retry / skip / abort entire orchestration?
+  - Ask developer: retry / skip / abort entire parallel-implement run?
   - Do not proceed to next wave until resolved
 
 **2.4 WAIT FOR WAVE**
@@ -259,7 +259,7 @@ Starting Wave 2 (2 task flows)...
 **3.5 GENERATE REPORT**
 - Consolidated implementation report:
   ```markdown
-  # Orchestration Report: {task-name}
+  # Parallel-Implement Report: {task-name}
   
   ## Summary
   - Task flows implemented: {N}/{N}
@@ -350,7 +350,7 @@ Starting Wave 2 (2 task flows)...
     git worktree remove "$wt"
   done
   ```
-- **Sub-agent branches (Claude Code only):** the auto-worktrees were checked out on transient branches named `orchestrate-implementer-<id>`. Their commits have been cherry-picked into the main branch (Phase 3.2), so the branches themselves are now redundant. They stay in the refs until manually pruned (`git branch -D orchestrate-implementer-<id>` per cherry-picked SHA) or until git's reflog/gc reclaims them. Pruning is optional housekeeping, not a correctness requirement.
+- **Sub-agent branches (Claude Code only):** the auto-worktrees were checked out on transient branches named `parallel-implementer-<id>`. Their commits have been cherry-picked into the main branch (Phase 3.2), so the branches themselves are now redundant. They stay in the refs until manually pruned (`git branch -D parallel-implementer-<id>` per cherry-picked SHA) or until git's reflog/gc reclaims them. Pruning is optional housekeeping, not a correctness requirement.
 
 **Opt-out:** `--no-commit` skips 4.2; staged files remain uncommitted.
 
@@ -358,35 +358,35 @@ Starting Wave 2 (2 task flows)...
 
 ## Platform Requirements
 
-orchestrate-flow needs the host AI tool to support **two** things:
+parallel-implement-flow needs the host AI tool to support **two** things:
 
-1. **Parallel subagent invocation** — the orchestrator must be able to spawn N subagents that run concurrently and return their reports independently.
+1. **Parallel subagent invocation** — parallel-implement-flow must be able to spawn N subagents that run concurrently and return their reports independently.
 2. **Per-subagent working directory** — each subagent must operate inside its own worktree path, isolated from the others. Otherwise all parallel subagents step on each other in the main project root and the worktree isolation is defeated.
 
 | Tool | Parallel subagents | Per-subagent CWD | Status |
 |---|---|---|---|
-| Claude Code | Yes (Agent tool, parallel via multi-tool-call message) | **Auto** — custom subagent `orchestrate-implementer` ships with `isolation: worktree` frontmatter; Claude Code creates `.claude/worktrees/orchestrate-implementer-<id>/` per call | **Supported (preferred — native)** |
+| Claude Code | Yes (Agent tool, parallel via multi-tool-call message) | **Auto** — custom subagent `parallel-implementer` ships with `isolation: worktree` frontmatter; Claude Code creates `.claude/worktrees/parallel-implementer-<id>/` per call | **Supported (preferred — native)** |
 | OpenCode | Documented: parallel via "Task tool" + General subagent ([opencode.ai/docs/agents](https://opencode.ai/docs/agents/)) | **NOT documented.** Prototype before relying on it. | Experimental |
 | Cursor / GitHub Copilot / Kimi-Code CLI | No primary subagent primitive | n/a | Not supported — use sequential implement-flow instead |
 
 **Workaround when per-subagent CWD is not supported (or unverified):** instruct each subagent to prefix every git command with `git -C .ai-workflow/worktrees/{task-name}/{task-flow}/ ...` instead of relying on CWD. File reads/writes use the absolute worktree path. This is fragile (any tool call that uses `cwd`-relative paths breaks isolation) but works as a fallback.
 
-**For Claude Code users:** verify the `orchestrate-implementer` subagent is installed (`ls .claude/agents/orchestrate-implementer.md`) and that the Agent tool lists it as a `subagent_type`. If absent, re-run `instructions.md` Step 7.1 to install the Claude Code wrapper bundle. Without the subagent, orchestrate-flow falls back to manual worktree allocation (the rest of this skeleton).
+**For Claude Code users:** verify the `parallel-implementer` subagent is installed (`ls .claude/agents/parallel-implementer.md`) and that the Agent tool lists it as a `subagent_type`. If absent, re-run `instructions.md` Step 7.1 to install the Claude Code wrapper bundle. Without the subagent, parallel-implement-flow falls back to manual worktree allocation (the rest of this skeleton).
 
-**For OpenCode users:** prototype with two parallel subagents on a 2-task-flow task before running orchestrate-flow on real work. If the subagents step on each other's files, fall back to sequential implement-flow until OpenCode documents per-subagent CWD support.
+**For OpenCode users:** prototype with two parallel subagents on a 2-task-flow task before running parallel-implement-flow on real work. If the subagents step on each other's files, fall back to sequential implement-flow until OpenCode documents per-subagent CWD support.
 
 ---
 
 ## Resume Logic
 
-If orchestrate-flow was interrupted (subagent crash, developer abort, session timeout):
+If parallel-implement-flow was interrupted (subagent crash, developer abort, session timeout):
 
 1. Read all task flow files in `flow-storage/tasks/{task-name}/implement/flow-plan/`
 2. Check for existing worktrees: `git worktree list | grep worktrees/{task-name}/`
 3. Determine last completed wave by task flow status:
 
 ```
-Orchestration Status: {task-name}
+Parallel-Implement Status: {task-name}
 
 Wave 1 (2/2 complete):
   ✓ user-session-store    complete   commit a1b2c3d
@@ -402,7 +402,7 @@ Wave 4 (pending):          (blocked by: Wave 3)
 Progress: 3/5 complete
 
 Resuming: login-form (in Wave 2, worktree intact)
-Or: re-run orchestrate-flow from scratch (--restart)
+Or: re-run parallel-implement-flow from scratch (--restart)
 ```
 
 **Resume strategy:**
@@ -417,7 +417,7 @@ Or: re-run orchestrate-flow from scratch (--restart)
 ## Customization
 
 Users can customize:
-- **Worktree base path** — default `.ai-workflow/worktrees/{task-name}/{task-flow}/` for OpenCode and manual setups. **Platform-controlled on Claude Code** (`.claude/worktrees/orchestrate-implementer-<id>/`) and not user-configurable from the flow; if you need a different path on Claude, you'd have to drop `isolation: worktree` from the subagent and fall back to the manual pattern.
+- **Worktree base path** — default `.ai-workflow/worktrees/{task-name}/{task-flow}/` for OpenCode and manual setups. **Platform-controlled on Claude Code** (`.claude/worktrees/parallel-implementer-<id>/`) and not user-configurable from the flow; if you need a different path on Claude, you'd have to drop `isolation: worktree` from the subagent and fall back to the manual pattern.
 - Max parallel subagents per wave
 - Conflict resolution strategy (auto-resolve thresholds)
 - Commit message format

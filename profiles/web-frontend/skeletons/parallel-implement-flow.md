@@ -1,4 +1,4 @@
-# Flow: Orchestrate
+# Flow: Parallel Implement
 
 > **Profile:** Web Frontend
 
@@ -7,7 +7,7 @@ After design-flow when the task has 3+ task flows with independent subsets and y
 
 ## Phases
 
-This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/orchestrate-flow.md`). Web-frontend notes below.
+This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/parallel-implement-flow.md`). Web-frontend notes below.
 
 ### Phase 1: PLAN *(STANDARD gate)*
 - **1.1 LOAD / 1.2 GROUP / 1.3 SCHEDULE** — see canonical.

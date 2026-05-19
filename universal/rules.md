@@ -314,20 +314,20 @@ When a flow is invoked as a sub-agent by an orchestrator, internal `[A]/[F]/[R]`
 
 ## Rule 17: Git Worktree Isolation
 
-Parallel task flows in the orchestrate-flow use isolated git worktrees. Each sub-agent works in its own worktree to avoid cross-contamination.
+Parallel task flows in the parallel-implement-flow use isolated git worktrees. Each sub-agent works in its own worktree to avoid cross-contamination.
 
 **Worktree conventions:**
 - Base path: `.ai-workflow/worktrees/{task-name}/{task-flow}/`
 - Created via: `git worktree add .ai-workflow/worktrees/{task-name}/{task-flow}/ {base-branch}`
 - Each worktree is an independent checkout of the same branch — no sharing files between concurrent subagents.
 - Subagents commit in their worktree as normal (conventional commits per Rule 7).
-- The orchestrator cherry-picks worktree commits into the main branch during Phase 3 MERGE.
+- Parallel-implement-flow cherry-picks worktree commits into the main branch during Phase 3 MERGE.
 - Worktrees are cleaned up (`git worktree remove`) after the final consolidation commit.
 
 **Guardrails (two-layer enforcement):**
 - **Design-time check** — design-flow Phase 1.4 PLAN validates pairwise file overlap: any two task flows with no `depends-on` between them but overlapping declared file lists must either gain a `depends-on` (forcing serial) or be merged. Verifiable from declared file lists; no `parallel-with` field is required.
-- **Orchestrate-time check** — orchestrate-flow Phase 1.2 GROUP re-validates at wave granularity after computing dependency waves: no two task flows in the same wave may share files. This catches anything the design-time check missed (e.g. files added to the lists after design sign-off).
-- **Last-resort detection** — if both layers missed a conflict, the orchestrator detects it as a cherry-pick merge conflict in Phase 3.2 and surfaces it to the developer at the MERGE gate.
+- **Wave-time check** — parallel-implement-flow Phase 1.2 GROUP re-validates at wave granularity after computing dependency waves: no two task flows in the same wave may share files. This catches anything the design-time check missed (e.g. files added to the lists after design sign-off).
+- **Last-resort detection** — if both layers missed a conflict, parallel-implement-flow detects it as a cherry-pick merge conflict in Phase 3.2 and surfaces it to the developer at the MERGE gate.
 - **No pushing from worktrees** — subagents commit locally; pushes happen (if at all) from the main worktree after MERGE acceptance.
 
 ---

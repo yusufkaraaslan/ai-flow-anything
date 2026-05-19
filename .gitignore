@@ -14,6 +14,6 @@
 
 # Nothing to ignore in flow-storage/ (it's the KB source of truth)
 
-# Orchestrator worktrees (created by orchestrate-flow Phase 2,
+# Parallel-implement worktrees (created by parallel-implement-flow Phase 2,
 # removed after MERGE; never meant to be committed)
 .ai-workflow/worktrees/

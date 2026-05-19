@@ -1,32 +1,32 @@
 ---
-name: orchestrate-flow
-description: Use when the developer says "orchestrate X", "implement all task flows for X", "run all task flows in parallel for X", or "build everything for X". Orchestrates the parallel implementation of ALL task flows for a task using isolated git worktrees and subagents, in 4 phases with 2 review gates [A]/[F]/[R] (one after the execution plan, one after merged implementation). Requires a signed-off task-design.md with task flow dependency graph. The full flow is in .ai-workflow/flows/orchestrate-flow.md — load that file and execute it.
+name: parallel-implement-flow
+description: Use when the developer says "implement all task flows for X in parallel", "run all task flows in parallel for X", "build everything for X in parallel", or "parallel-implement X". Coordinates the parallel implementation of ALL task flows for a task using isolated git worktrees and subagents, in 4 phases with 2 review gates [A]/[F]/[R] (one after the execution plan, one after merged implementation). Requires a signed-off task-design.md with task flow dependency graph. The full flow is in .ai-workflow/flows/parallel-implement-flow.md — load that file and execute it.
 license: MIT
 metadata:
   audience: developers
   workflow: task-development
-  phase: orchestrate
+  phase: parallel-implement
 ---
 
-# orchestrate-flow (OpenCode wrapper)
+# parallel-implement-flow (OpenCode wrapper)
 
-This skill runs the **parallel orchestration** of all task flows for a task. The full flow lives in `.ai-workflow/flows/orchestrate-flow.md`. Read it and execute.
+This skill runs the **parallel implementation** of all task flows for a task. The full flow lives in `.ai-workflow/flows/parallel-implement-flow.md`. Read it and execute.
 
 ## When to invoke
 
-- "Orchestrate {task-name}"
+- "Parallel-implement {task-name}"
 - "Implement all task flows for {task-name}"
 - "Run all task flows in parallel for {task-name}"
 - "Build everything for {task-name}"
 
-The developer may also say "implement {task-name}" (without specifying a task flow). If the task has 3+ task flows with independent subsets, suggest orchestrate-flow as the faster option.
+The developer may also say "implement {task-name}" (without specifying a task flow). If the task has 3+ task flows with independent subsets, suggest parallel-implement-flow as the faster option.
 
 ## Hard preconditions
 
 1. **task-design.md signed off** at `flow-storage/tasks/{task-name}/design/task-design.md`
 2. **Task flow files exist** in `flow-storage/tasks/{task-name}/implement/flow-plan/` with `depends-on` frontmatter
 3. **Git worktree support** (`git worktree --help` works on this machine)
-4. **Working directory clean** (`git status` reports no changes). Phase 3 MERGE cherry-picks into the main WD; a dirty WD is unsafe. If dirty, offer Stash / Commit-first / Abort. See `.ai-workflow/flows/orchestrate-flow.md` Prerequisites for the script.
+4. **Working directory clean** (`git status` reports no changes). Phase 3 MERGE cherry-picks into the main WD; a dirty WD is unsafe. If dirty, offer Stash / Commit-first / Abort. See `.ai-workflow/flows/parallel-implement-flow.md` Prerequisites for the script.
 
 If any precondition fails, STOP and direct developer to design-flow, implement-flow (sequential), or `git stash` as appropriate.
 
@@ -57,7 +57,7 @@ No blocking gates in this phase — the plan was already approved.
 - **3.2 CHERRY-PICK** — Cherry-pick worktree commits into main branch; resolve conflicts.
 - **3.3 VALIDATE** — Run full test suite, integration checks.
 - **3.4 UPDATE RECORDS** — Transform all task flow files to knowledge records; update TDD, edge-cases, PATTERNS.
-- **3.5 GENERATE REPORT** — Consolidated orchestration report.
+- **3.5 GENERATE REPORT** — Consolidated implementation report.
 → **Gate 2: Final implementation review** — the ONE AND ONLY implementation gate. Developer reviews merged code, consolidated report, validation results.
 
 ### Phase 4: COMMIT *(auto — no gate)*
@@ -77,6 +77,6 @@ No blocking gates in this phase — the plan was already approved.
 
 OpenCode documents parallel subagent invocation via the Task tool ([opencode.ai/docs/agents](https://opencode.ai/docs/agents/)) and the General subagent supports "running multiple units of work in parallel." However, OpenCode does **not** document a mechanism for per-subagent custom working directories — the assumption that subagents operate inside their own worktree path is unverified.
 
-Before running orchestrate-flow on real work, prototype with two parallel subagents on a 2-task-flow task and confirm they each operate inside distinct `.ai-workflow/worktrees/{task-name}/*` directories. If they step on each other in the main project root, fall back to sequential `implement-flow` until OpenCode documents per-subagent CWD support, OR use the `git -C <worktree-path>` prefix workaround described in `.ai-workflow/flows/orchestrate-flow.md` § Platform Requirements.
+Before running parallel-implement-flow on real work, prototype with two parallel subagents on a 2-task-flow task and confirm they each operate inside distinct `.ai-workflow/worktrees/{task-name}/*` directories. If they step on each other in the main project root, fall back to sequential `implement-flow` until OpenCode documents per-subagent CWD support, OR use the `git -C <worktree-path>` prefix workaround described in `.ai-workflow/flows/parallel-implement-flow.md` § Platform Requirements.
 
-For full instructions read `.ai-workflow/flows/orchestrate-flow.md`.
+For full instructions read `.ai-workflow/flows/parallel-implement-flow.md`.

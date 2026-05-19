@@ -14,7 +14,7 @@ Every profile provides one or more flows. The core set is:
 | **design-flow** | Design tasks with diagrams | Task idea | task-design.md, task-technical-design.md, task-edge-cases.md, diagrams, task flows |
 | **implement-flow** | Implement task flows with validation | Task flow files | Source code, updated task flows (knowledge records) |
 | **free-flow** | Quick unstructured work — bug fixes, small enhancements, refactors | Developer description | Fixed code, task-flow record, updated impacted KB entries |
-| **orchestrate-flow** | Parallel task flow orchestration | Task name (all task flows) | Merged implementation, consolidated report |
+| **parallel-implement-flow** | Parallel implementation of all task flows | Task name (all task flows) | Merged implementation, consolidated report |
 | **pr-flow** | PR lifecycle management | Completed task flows | Validation report, feedback task flows, lessons learned |
 | **test-flow** | Test planning & execution | Task docs | Test files, coverage report |
 | **deploy-flow** | Deployment & release | Build artifacts | Deployed release, verification report |
@@ -37,7 +37,7 @@ The default cadence varies by flow type:
 | design-flow | CRITICAL (only gate) | — (auto) | — | — |
 | implement-flow | STANDARD | CRITICAL | — | — |
 | free-flow | STANDARD | STANDARD | CRITICAL | — |
-| orchestrate-flow | STANDARD (plan) | — (auto) | CRITICAL (merge) | — (auto) |
+| parallel-implement-flow | STANDARD (plan) | — (auto) | CRITICAL (merge) | — (auto) |
 | pr-flow (all modes) | STANDARD | CRITICAL | — | — |
 | test-flow | STANDARD | STANDARD | — | — |
 | docs-flow | STANDARD | CRITICAL | — | — |
@@ -96,7 +96,7 @@ Phase 1: DESIGN
               If yes, either add a depends-on edge (forcing them
               sequential) or merge them. This is verifiable at design
               time from the file lists alone — no `parallel-with`
-              field is needed. The orchestrate-flow's GROUP sub-task
+              field is needed. The parallel-implement-flow's GROUP sub-task
               will later enforce the same property at wave granularity,
               but catching it here means the developer fixes it once
               instead of bouncing through the wave plan.
@@ -325,9 +325,9 @@ Phase 3: FIX
   for the report format.
 ```
 
-### Orchestrate Flow Phases
+### Parallel Implement Flow Phases
 
-The orchestrate flow processes an entire task's task flows in parallel waves ordered by dependencies. Subagents implement individual task flows in isolated git worktrees; the orchestrator merges results and presents ONE gate at the end. Each subagent uses the implement-flow in **sub-agent mode** (no blocking gates, auto-proceed through all sub-tasks, return an implementation report).
+The parallel-implement flow processes an entire task's task flows in parallel waves ordered by dependencies. Subagents implement individual task flows in isolated git worktrees; the parent flow merges results and presents ONE gate at the end. Each subagent uses the implement-flow in **sub-agent mode** (no blocking gates, auto-proceed through all sub-tasks, return an implementation report).
 
 ```
 Phase 1: PLAN
@@ -379,7 +379,7 @@ Phase 2: EXECUTE
             checkout of {base-branch} containing every branch-tracked
             file already (design docs, KB files, .ai-workflow/).
             Only intervene if .ai-workflow/ is gitignored — see the
-            profile's orchestrate-flow.md for the symlink fallback.
+            profile's parallel-implement-flow.md for the symlink fallback.
       2.2 LAUNCH SUBAGENTS (parallel)
           → For each task flow in this wave, launch one subagent
             running implement-flow in sub-agent mode.
@@ -938,7 +938,7 @@ lessons-learned.md + PATTERNS.md updates
 Task complete
 ```
 
-### Parallel orchestrated path (orchestrate-flow)
+### Parallel implementation path (parallel-implement-flow)
 
 ```
 Developer idea
@@ -947,7 +947,7 @@ Run design flow for {name}
     ↓
 task-design.md + diagrams + task flow files (with dependency graph)
     ↓
-Run orchestrate flow for {name}
+Run parallel-implement flow for {name}
     ↓
 Phase 1: PLAN → execution plan gate
     ↓

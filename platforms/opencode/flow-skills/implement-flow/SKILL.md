@@ -1,6 +1,6 @@
 ---
 name: implement-flow
-description: Use when the developer says "implement X", "implement task flow Y for X", "work on the next task flow", "continue X", "next task flow", or asks to write task code. Implements ONE task flow from a task that already has a signed-off task-design.md, in 2 phases with 2 review gates [A]/[F]/[R] (one after build+validate, one before commit). REFUSES to run if flow-storage/tasks/{task-name}/design/task-design.md does not exist or is not signed off — run design-flow first in that case. The full flow is in .ai-workflow/flows/implement-flow.md. Also supports sub-agent mode: when called by the orchestrate-flow, gates are suppressed and the flow auto-proceeds, returning a structured report.
+description: Use when the developer says "implement X", "implement task flow Y for X", "work on the next task flow", "continue X", "next task flow", or asks to write task code. Implements ONE task flow from a task that already has a signed-off task-design.md, in 2 phases with 2 review gates [A]/[F]/[R] (one after build+validate, one before commit). REFUSES to run if flow-storage/tasks/{task-name}/design/task-design.md does not exist or is not signed off — run design-flow first in that case. The full flow is in .ai-workflow/flows/implement-flow.md. Also supports sub-agent mode: when called by the parallel-implement-flow, gates are suppressed and the flow auto-proceeds, returning a structured report.
 license: MIT
 metadata:
   audience: developers
@@ -20,8 +20,8 @@ This skill runs the **implementation phase** for one task flow of a task. The fu
 - "Work on task flow {number} for {task-name}"
 - "Continue implementing {task-name}"
 
-**Sub-agent mode (no gates — invoked by orchestrate-flow):**
-- Check if the launch context includes `mode: sub-agent` or `sub-agent of the implement-orchestrator`.
+**Sub-agent mode (no gates — invoked by parallel-implement-flow):**
+- Check if the launch context includes `mode: sub-agent` or `sub-agent of the parallel-implement-flow`.
 - If yes: auto-proceed through all sub-tasks, suppress all `[A]/[F]/[R]` gates, commit in the provided git worktree, and return a structured implementation report per Rule 16.
 
 ## Hard preconditions
@@ -62,10 +62,10 @@ Sub-tasks (auto-proceed):
 
 ## Sub-agent mode
 
-When invoked by the orchestrate-flow (`mode: sub-agent` in the launch context):
+When invoked by the parallel-implement-flow (`mode: sub-agent` in the launch context):
 
 - **No `[A]/[F]/[R]` gates** — all sub-tasks auto-proceed (Rule 16).
-- **Works in an isolated git worktree** at the path provided by the orchestrator.
+- **Works in an isolated git worktree** at the path provided by the parent flow.
 - **Commits in the worktree** (conventional commit per Rule 7). Do not push.
 - **Returns a structured report** instead of presenting gate artifacts:
 

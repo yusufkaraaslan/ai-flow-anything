@@ -226,12 +226,12 @@ Users can customize:
 
 ## Sub-Agent Mode
 
-When this flow is invoked as a **sub-agent** by the orchestrate-flow, it runs in a different mode:
+When this flow is invoked as a **sub-agent** by the parallel-implement-flow, it runs in a different mode:
 
-**Trigger:** The orchestrator passes `mode: sub-agent` in its launch prompt.
+**Trigger:** Parallel-implement-flow passes `mode: sub-agent` in its launch prompt.
 
 **Behavior changes:**
-- **No `[A]/[F]/[R]` gates.** All sub-tasks auto-proceed without user-facing interruption. The orchestrator handles the only gate.
+- **No `[A]/[F]/[R]` gates.** All sub-tasks auto-proceed without user-facing interruption. Parallel-implement-flow handles the only gate.
 - **Works in an isolated git worktree** at `.ai-workflow/worktrees/{task-name}/{task-flow}/`.
 - **Commits in the worktree** at the end of Phase 2. Do not push.
 - **Returns a structured implementation report** instead of presenting gate artifacts. Format:

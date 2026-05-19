@@ -1,4 +1,4 @@
-# Flow: Orchestrate
+# Flow: Parallel Implement
 
 > **Profile:** Godot Game
 
@@ -7,7 +7,7 @@ After design-flow when the task has 3+ task flows with independent subsets and y
 
 ## Phases
 
-This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/orchestrate-flow.md`). Godot-specific notes below.
+This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/parallel-implement-flow.md`). Godot-specific notes below.
 
 ### Phase 1: PLAN *(STANDARD gate)*
 - **1.1 LOAD / 1.2 GROUP / 1.3 SCHEDULE** — see canonical.
@@ -46,4 +46,4 @@ This profile follows the canonical **4-phase, 2-gate** structure from `universal
 
 - **`.import/` cache is per-worktree.** Each fresh worktree triggers a full asset reimport on first `godot --headless` invocation — slow but unavoidable. Subagents should expect a one-time delay.
 - **Editor instance contention.** Godot allows multiple editor instances on different paths simultaneously (unlike Unity), so worktrees can run in parallel without conflict.
-- **Autoload registration** lives in `project.godot`. If two parallel task flows both register a new autoload, the cherry-pick will conflict on `project.godot`. The orchestrator surfaces this at MERGE.
+- **Autoload registration** lives in `project.godot`. If two parallel task flows both register a new autoload, the cherry-pick will conflict on `project.godot`. Parallel-implement-flow surfaces this at MERGE.

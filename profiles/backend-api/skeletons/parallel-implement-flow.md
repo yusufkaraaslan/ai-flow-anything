@@ -1,4 +1,4 @@
-# Flow: Orchestrate
+# Flow: Parallel Implement
 
 > **Profile:** Backend API
 
@@ -7,7 +7,7 @@ After design-flow when the task has 3+ task flows with independent subsets (e.g.
 
 ## Phases
 
-This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/orchestrate-flow.md`). Backend-API notes below.
+This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/parallel-implement-flow.md`). Backend-API notes below.
 
 ### Phase 1: PLAN *(STANDARD gate)*
 - **1.1 LOAD / 1.2 GROUP / 1.3 SCHEDULE** — see canonical.
@@ -49,6 +49,6 @@ This profile follows the canonical **4-phase, 2-gate** structure from `universal
 ## Backend-API worktree caveats
 
 - **Database state.** Parallel subagents running tests against a shared dev database race each other. Strongly prefer per-worktree test databases (separate file for SQLite; separate schema for Postgres) or use the framework's transactional test rollback. Detail in `flow-storage/project/CONVENTIONS.md` if your project has a standard pattern.
-- **Migration filename collisions.** Two parallel task flows generating migrations within the same second produce identical or near-identical filenames. The orchestrator surfaces these as cherry-pick conflicts at MERGE; resolution is usually rename-and-renumber.
+- **Migration filename collisions.** Two parallel task flows generating migrations within the same second produce identical or near-identical filenames. Parallel-implement-flow surfaces these as cherry-pick conflicts at MERGE; resolution is usually rename-and-renumber.
 - **Virtual env / dependency isolation.** Per-worktree `venv/` (Python), `vendor/` (Go), or `node_modules/` (Node) keep dependency state isolated. First install in each worktree is the slow path.
 - **External service contention.** If subagents hit the same external service (e.g. a shared dev queue, a single Stripe test account), serialize those tests instead of running them in parallel. The PLAN gate is the time to flag this.

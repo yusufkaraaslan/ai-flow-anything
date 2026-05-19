@@ -16,7 +16,7 @@
 ## When NOT to Use
 
 - New features requiring design — use **design-flow** then **implement-flow**
-- Multi-day work with task flow decomposition — use **design-flow** + **orchestrate-flow**
+- Multi-day work with task flow decomposition — use **design-flow** + **parallel-implement-flow**
 - The developer explicitly wants the full design-implement-review chain
 
 **Rule of thumb:** If you'd need to create a class diagram to explain the work, use design-flow instead. If the change can be described in 2-3 sentences, free-flow is the right tool.

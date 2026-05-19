@@ -1,4 +1,4 @@
-# Flow: Orchestrate
+# Flow: Parallel Implement
 
 > **Profile:** Mobile App
 
@@ -7,7 +7,7 @@ After design-flow when the task has 3+ task flows with independent subsets and y
 
 ## Phases
 
-This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/orchestrate-flow.md`). Mobile-app notes below.
+This profile follows the canonical **4-phase, 2-gate** structure from `universal/workflow-structure.md` (and `profiles/generic/skeletons/parallel-implement-flow.md`). Mobile-app notes below.
 
 ### Phase 1: PLAN *(STANDARD gate)*
 - **1.1 LOAD / 1.2 GROUP / 1.3 SCHEDULE** — see canonical.
@@ -32,7 +32,7 @@ This profile follows the canonical **4-phase, 2-gate** structure from `universal
   flutter test                      # Flutter unit + widget tests
   npm test                          # React Native (Jest)
   ```
-  Native UI tests (Detox, XCTest, Espresso) run sequentially after MERGE acceptance — emulator/simulator contention makes them unsuitable for parallel orchestration.
+  Native UI tests (Detox, XCTest, Espresso) run sequentially after MERGE acceptance — emulator/simulator contention makes them unsuitable for parallel implementation.
 
 → **Gate 2: Final implementation review.**
 

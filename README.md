@@ -72,12 +72,14 @@ After initializing ai-flow-anything, your project has:
 ```
 .ai-workflow/
 ├── flows/
-│   ├── design-flow.md      # Design tasks with diagrams
-│   ├── implement-flow.md   # Implement task flows with validation
-│   ├── pr-flow.md          # PR lifecycle management
-│   ├── test-flow.md        # Test planning & execution
-│   ├── deploy-flow.md      # Deployment & release
-│   └── docs-flow.md        # Documentation maintenance
+│   ├── design-flow.md              # Design tasks with diagrams
+│   ├── implement-flow.md           # Implement task flows with validation
+│   ├── free-flow.md                # Quick fixes, tweaks, small refactors
+│   ├── parallel-implement-flow.md  # Parallel implementation of all task flows
+│   ├── pr-flow.md                  # PR lifecycle management
+│   ├── test-flow.md                # Test planning & execution
+│   ├── deploy-flow.md              # Deployment & release
+│   └── docs-flow.md                # Documentation maintenance
 │
 └── knowledge-base/
     ├── project/              # Architecture, conventions, patterns

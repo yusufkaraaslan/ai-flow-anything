@@ -1,12 +1,12 @@
 ---
-name: orchestrate-flow
-description: Orchestrate parallel implementation of ALL task flows for a task using git worktrees and subagents. Run after design-flow. Use when the task has 3+ task flows with independent subsets.
+name: parallel-implement-flow
+description: Run parallel implementation of ALL task flows for a task using git worktrees and subagents. Run after design-flow. Use when the task has 3+ task flows with independent subsets.
 argument-hint: <task-name> [--no-commit]
 ---
 
-# /orchestrate-flow
+# /parallel-implement-flow
 
-This command runs the **parallel orchestration flow** for a task. It:
+This command runs the **parallel-implement flow** for a task. It:
 1. Reads all task flow files and builds a dependency graph
 2. Presents a wave-based execution plan for your approval
 3. Launches subagents (implement-flow in auto-proceed mode) in parallel within each wave
@@ -16,8 +16,8 @@ This command runs the **parallel orchestration flow** for a task. It:
 ## Usage
 
 ```
-/orchestrate-flow user-authentication
-/orchestrate-flow shield-power-up --no-commit
+/parallel-implement-flow user-authentication
+/parallel-implement-flow shield-power-up --no-commit
 ```
 
 ## Prerequisites
@@ -38,7 +38,7 @@ This command runs the **parallel orchestration flow** for a task. It:
 ## Example
 
 ```
-/orchestrate-flow user-authentication
+/parallel-implement-flow user-authentication
 
 → Phase 1: GROUP & PLAN
   Wave 1: user-session-store, auth-interfaces       [2 parallel]
@@ -60,4 +60,4 @@ This command runs the **parallel orchestration flow** for a task. It:
   [A]ccept / [F]eedback / [R]eject?
 ```
 
-For the full flow, see `.ai-workflow/flows/orchestrate-flow.md`.
+For the full flow, see `.ai-workflow/flows/parallel-implement-flow.md`.
