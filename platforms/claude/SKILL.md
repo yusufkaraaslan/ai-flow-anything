@@ -17,7 +17,7 @@ When the developer uses one of these slash commands, treat it as the correspondi
 | Slash command | Intent |
 |---------------|--------|
 | `/ai-flow-anything init` | Initialize ai-flow-anything for this project |
-| `/ai-flow-anything flow <name>` | Run a specific flow (`<name>` is one of: design, implement, pr, test, deploy, docs) |
+| `/ai-flow-anything flow <name>` | Run a specific flow (`<name>` is one of: design, implement, free, pr, test, deploy, docs) |
 | `/ai-flow-anything status` | Show project workflow status |
 | `/ai-flow-anything kb <query>` | Search the knowledge base |
 | `/design-flow <task>` | Run the design flow against `<task>` |
@@ -27,6 +27,7 @@ When the developer uses one of these slash commands, treat it as the correspondi
 | `/test-flow <task>` | Run the test flow against `<task>` |
 | `/deploy-flow <task>` | Run the deploy flow against `<task>` |
 | `/docs-flow <task>` | Run the docs flow against `<task>` |
+| `/free-flow <issue>` | Run the free flow against `<issue>` — quick bug fixes, tweaks, small refactors |
 
 If the developer expresses one of these intents in natural language ("design a task called auth", "implement the next task flow", "orchestrate auth") instead of a slash command, treat it the same way.
 

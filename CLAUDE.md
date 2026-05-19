@@ -35,7 +35,7 @@ Four layers, strictly ordered (more universal → more specific):
 
 - `instructions.md` — Repo-root entry point. The platform-neutral version of the workflow that every wrapper references. Drop this and the system has no orchestration.
 - `universal/rules.md` — 17 numbered rules with severity (`error` / `warning` / `info`). Rules 1, 2, 4, 6, 8, 9, 16 are blocking. **When adding a rule, follow the existing numbered structure** and assign a severity in the "Enforcement" section at the bottom.
-- `universal/workflow-structure.md` — Defines the 7 flow types and their phase architecture. **Each flow declares its gate cadence in a table under "Phase Architecture."** Design-flow uses 1 CRITICAL gate (single review phase + auto LOCK & COMMIT). Implement-flow uses 2 gates (STANDARD + CRITICAL). Orchestrate-flow uses 2 gates (STANDARD plan review + CRITICAL merged review) with auto phases for EXECUTE and COMMIT. Deploy-flow keeps both gates as CRITICAL (deploy is hard-to-reverse). PR flow is modal (3 modes × 2 phases each). Each phase contains multiple sub-tasks (1.1, 1.2, ...) that auto-proceed without intermediate gates; only the parent phase presents an `[A]ccept / [F]eedback / [R]eject` gate (Rule 6 still satisfied).
+- `universal/workflow-structure.md` — Defines the 8 flow types and their phase architecture. **Each flow declares its gate cadence in a table under "Phase Architecture."** Design-flow uses 1 CRITICAL gate (single review phase + auto LOCK & COMMIT). Implement-flow uses 2 gates (STANDARD + CRITICAL). Free-flow uses 3 gates (STANDARD TALK + STANDARD PLAN + CRITICAL FIX). Orchestrate-flow uses 2 gates (STANDARD plan review + CRITICAL merged review) with auto phases for EXECUTE and COMMIT. Deploy-flow keeps both gates as CRITICAL (deploy is hard-to-reverse). PR flow is modal (3 modes × 2 phases each). Each phase contains multiple sub-tasks (1.1, 1.2, ...) that auto-proceed without intermediate gates; only the parent phase presents an `[A]ccept / [F]eedback / [R]eject` gate (Rule 6 still satisfied).
 - `universal/diagram-standards.md` — PlantUML is the default; Mermaid and D2 are alternatives.
 - `universal/knowledge-base-spec.md` — Three-tier KB: task-level (`flow-storage/tasks/{task-name}/`), project-level (`flow-storage/project/`), team-level (`flow-storage/team/`).
 - `universal/slot-catalog-template.md`, `universal/flow-authoring-guide.md` — Templates and authoring conventions for new profiles/flows.
@@ -47,7 +47,7 @@ Each profile MUST have these four files (the system reads them by name):
 - `README.md` — Detection hints (file/directory indicators + confidence scoring) and capability summary. The detection block is parsed by the AI during initialization.
 - `discovery.md` — Step-by-step instructions for the AI to explore a codebase of this type and fill named **slots** (`project-name`, `source-directory`, etc.).
 - `rules.md` — Tech-stack-specific conventions layered on top of `universal/rules.md`.
-- `skeletons/*.md` — Flow templates with `{slot-name}` placeholders. Standard set is seven files: `design-flow.md`, `implement-flow.md`, `orchestrate-flow.md`, `pr-flow.md`, `test-flow.md`, `deploy-flow.md`, `docs-flow.md`.
+- `skeletons/*.md` — Flow templates with `{slot-name}` placeholders. Standard set is eight files: `design-flow.md`, `implement-flow.md`, `free-flow.md`, `orchestrate-flow.md`, `pr-flow.md`, `test-flow.md`, `deploy-flow.md`, `docs-flow.md`.
 
 Existing profiles: `generic` (low-confidence fallback), `godot-game`, `unity-game`, `web-frontend`, `backend-api`, `mobile-app`.
 

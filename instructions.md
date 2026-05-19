@@ -13,7 +13,7 @@ ai-flow-anything responds to the following developer intents. Each platform wrap
 | Intent | What the AI does |
 |--------|------------------|
 | **Initialize ai-flow-anything for this project** | Detect project type, discover the codebase, ask the developer for missing context, and generate tailored flows into `.ai-workflow/flows/`. |
-| **Run a specific flow** (design, implement, orchestrate, pr, test, deploy, docs) | Load the corresponding flow file from `.ai-workflow/flows/` and execute its phases against the named task. |
+| **Run a specific flow** (design, implement, free, orchestrate, pr, test, deploy, docs) | Load the corresponding flow file from `.ai-workflow/flows/` and execute its phases against the named task. |
 | **Show project workflow status** | Read the knowledge base and report progress across in-flight tasks and their task flows. |
 | **Search the knowledge base** | Query `flow-storage/project/`, `flow-storage/team/`, and `flow-storage/tasks/` for relevant prior work. |
 
@@ -117,13 +117,13 @@ For each tool identified in Step 0, install the matching wrapper(s) to its canon
 
 | Tool | Source | Destination |
 |---|---|---|
-| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all seven flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all seven command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design,implement,orchestrate,pr,test,deploy,docs}-flow/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,orchestrate-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md` (8 skills + 7 commands = 15 files) |
+| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all eight flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all eight command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design,implement,free,orchestrate,pr,test,deploy,docs}-flow/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,free-flow,orchestrate-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md` (9 skills + 8 commands = 17 files) |
 | Claude Code | `platforms/claude/SKILL.md` (master) **plus** `platforms/claude/flow-skills/orchestrate-flow/SKILL.md` (per-flow skill) **plus** `platforms/claude/agents/orchestrate-implementer.md` (custom subagent) **plus** `platforms/claude/commands/orchestrate-flow.md` (slash command) | `.claude/skills/ai-flow-anything/SKILL.md`, `.claude/skills/orchestrate-flow/SKILL.md`, `.claude/agents/orchestrate-implementer.md`, AND `.claude/commands/orchestrate-flow.md` (4 files) |
 | Cursor | `platforms/cursor/ai-flow-anything.mdc` | `.cursor/rules/ai-flow-anything.mdc` |
 | GitHub Copilot | `platforms/github-copilot/copilot-instructions.md` | `.github/copilot-instructions.md` (append, do not overwrite if file already exists) |
 | Kimi-Code CLI | `platforms/kimi-code/AGENTS.md` | `AGENTS.md` at repo root (append, do not overwrite — see notes in `platforms/kimi-code/README.md`) |
 
-**Why OpenCode installs eight skills plus seven commands:** OpenCode has two concepts — *skills* (`.opencode/skills/{name}/SKILL.md`, agent decides via tool call when to load) and *commands* (`.opencode/commands/{name}.md`, user types `/{name}` to invoke directly). They're complementary, not redundant. Skills give the agent strong description-driven matching for natural-language requests; commands give the developer a one-keystroke way to start a flow without going through the `/skills` picker. Installing only skills leaves the developer with a two-click invocation (`/skills` → pick); installing both gets parity with Claude Code's `/design-flow <task>` slash UX. Each command file (~15–25 lines) is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow.
+**Why OpenCode installs nine skills plus eight commands:** OpenCode has two concepts — *skills* (`.opencode/skills/{name}/SKILL.md`, agent decides via tool call when to load) and *commands* (`.opencode/commands/{name}.md`, user types `/{name}` to invoke directly). They're complementary, not redundant. Skills give the agent strong description-driven matching for natural-language requests; commands give the developer a one-keystroke way to start a flow without going through the `/skills` picker. Installing only skills leaves the developer with a two-click invocation (`/skills` → pick); installing both gets parity with Claude Code's `/design-flow <task>` slash UX. Each command file (~15–25 lines) is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow.
 
 **Why Claude Code installs four files (only one flow has a per-flow skill so far):** Claude Code's master `SKILL.md` covers most flows via its command alias table (`/design-flow`, `/implement-flow`, `/pr-flow`, etc. all map to natural-language intents). **Orchestrate-flow is the exception** — it requires parallel subagent dispatch with per-subagent worktree isolation, which is a different primitive than a single-session flow. To support it natively, Claude Code needs three additional pieces beyond the master skill:
 
@@ -131,7 +131,7 @@ For each tool identified in Step 0, install the matching wrapper(s) to its canon
 2. **Custom subagent** at `.claude/agents/orchestrate-implementer.md` with `isolation: worktree` in its frontmatter — when the orchestrator calls this subagent type, Claude Code auto-creates a fresh worktree under `.claude/worktrees/orchestrate-implementer-<id>/` and runs the subagent there. This replaces the manual `git worktree add` loop the canonical flow describes.
 3. **Slash command** at `.claude/commands/orchestrate-flow.md` for `/orchestrate-flow <task-name>` one-keystroke invocation.
 
-The other six flows (design, implement, pr, test, deploy, docs) stay on the master skill until/unless they grow Claude-specific platform mechanics worth a dedicated wrapper. Don't pre-add per-flow skills for the other flows on Claude — there's no Claude primitive they'd use that the master skill doesn't already cover.
+The other seven flows (design, implement, free, pr, test, deploy, docs) stay on the master skill until/unless they grow Claude-specific platform mechanics worth a dedicated wrapper. Don't pre-add per-flow skills for the other flows on Claude — there's no Claude primitive they'd use that the master skill doesn't already cover.
 
 Prefer **symlinks** over copies if the OS supports them, so `git pull` in `.ai-workflow/` propagates wrapper updates automatically. Fall back to copy when symlinks aren't available.
 
@@ -233,6 +233,7 @@ When the developer's request matches one of the intents below, load and follow t
 |---|---|
 | "design task X" / "let's design X" | `.ai-workflow/flows/design-flow.md` |
 | "implement X" / "next task flow" | `.ai-workflow/flows/implement-flow.md` |
+| "quick fix X" / "bug fix" / "tweak Y" / "hotfix" / "small change" | `.ai-workflow/flows/free-flow.md` |
 | "orchestrate X" / "build everything for X" | `.ai-workflow/flows/orchestrate-flow.md` |
 | "test X" / "add tests" | `.ai-workflow/flows/test-flow.md` |
 | "validate X for PR" / "PR check" | `.ai-workflow/flows/pr-flow.md` |
@@ -267,7 +268,7 @@ If multiple host tools were chosen in Step 0, write the directive to every appli
 
 Before declaring init complete, confirm every artifact landed. The AI must be able to answer "yes" to all of these:
 
-- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **eight** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,orchestrate-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **seven** commands: `.opencode/commands/{design-flow,implement-flow,orchestrate-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md`. The skills picker should show 8 entries; typing `/` should suggest the 7 commands. Either missing means the install is incomplete. For Claude Code specifically, verify all **four** files are present: `.claude/skills/ai-flow-anything/SKILL.md`, `.claude/skills/orchestrate-flow/SKILL.md`, `.claude/agents/orchestrate-implementer.md`, and `.claude/commands/orchestrate-flow.md`. The Agent tool's `subagent_type` listing should include `orchestrate-implementer`; typing `/orchestrate-flow` should autocomplete to the command. Either missing means the install is incomplete and orchestrate-flow will fall back to manual worktree allocation.
+- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **nine** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,free-flow,orchestrate-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **eight** commands: `.opencode/commands/{design-flow,implement-flow,free-flow,orchestrate-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md`. The skills picker should show 9 entries; typing `/` should suggest the 8 commands. Either missing means the install is incomplete. For Claude Code specifically, verify all **four** files are present: `.claude/skills/ai-flow-anything/SKILL.md`, `.claude/skills/orchestrate-flow/SKILL.md`, `.claude/agents/orchestrate-implementer.md`, and `.claude/commands/orchestrate-flow.md`. The Agent tool's `subagent_type` listing should include `orchestrate-implementer`; typing `/orchestrate-flow` should autocomplete to the command. Either missing means the install is incomplete and orchestrate-flow will fall back to manual worktree allocation.
 - [ ] **`instructions.md` reachable** — either at `.ai-workflow/instructions.md` (Layout A) or via a symlink resolving to ai-flow-anything (Layout B). The wrapper's "Read `instructions.md` before acting" sentence must not be a dangling reference.
 - [ ] **`universal/rules.md` reachable** — at `.ai-workflow/universal/rules.md` or via the symlink.
 - [ ] **Detected profile reachable** — at `.ai-workflow/profiles/{detected}/` or via the symlink. At minimum the four files `README.md`, `discovery.md`, `rules.md`, and `skeletons/` must be present.
@@ -292,9 +293,10 @@ When acting on any ai-flow-anything intent, read files in this order. Paths are 
 4. profiles/{detected}/discovery.md      (after detection)
 5. profiles/{detected}/rules.md          (after detection)
 6. profiles/{detected}/skeletons/*.md    (during generation)
-7. universal/diagram-standards.md        (when generating diagrams)
-8. universal/knowledge-base-spec.md      (when creating KB)
-9. .ai-workflow/rules.md                 (if present — project-specific overrides, layered last)
+7. profiles/generic/skeletons/free-flow.md (when using free-flow — canonical)
+8. universal/diagram-standards.md        (when generating diagrams)
+9. universal/knowledge-base-spec.md      (when creating KB)
+10. .ai-workflow/rules.md                 (if present — project-specific overrides, layered last)
 ```
 
 ---
@@ -377,9 +379,10 @@ flow-storage/
         │   ├── task-technical-design.md
         │   ├── task-edge-cases.md
         │   └── diagrams/
-        ├── implement/                                 # implement-flow output
+        ├── implement/                                 # implement-flow + free-flow output
         │   └── flow-plan/
-        │       └── task-flow-{task-flow-name}.md
+        │       ├── task-flow-{task-flow-name}.md    # implement-flow
+        │       └── task-flow-{free-flow-name}.md    # free-flow (related task)
         ├── test/                                      # test-flow output
         ├── pr/                                        # pr-flow output
         │   └── feedback/
@@ -400,7 +403,7 @@ When the developer asks to run a flow against a task (for example, "design task 
 4. Execute phases, producing the artifacts the flow specifies
 5. Present for developer review at each phase gate
 
-The same pattern applies to all flow types — design, implement, pr, test, deploy, docs — and to any custom flows the project has added.
+The same pattern applies to all flow types — design, implement, free, pr, test, deploy, docs — and to any custom flows the project has added.
 
 ---
 

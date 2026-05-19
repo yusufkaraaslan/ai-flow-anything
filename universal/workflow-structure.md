@@ -13,6 +13,7 @@ Every profile provides one or more flows. The core set is:
 |--------|---------|-------|--------|
 | **design-flow** | Design tasks with diagrams | Task idea | task-design.md, task-technical-design.md, task-edge-cases.md, diagrams, task flows |
 | **implement-flow** | Implement task flows with validation | Task flow files | Source code, updated task flows (knowledge records) |
+| **free-flow** | Quick unstructured work — bug fixes, small enhancements, refactors | Developer description | Fixed code, task-flow record, updated impacted KB entries |
 | **orchestrate-flow** | Parallel task flow orchestration | Task name (all task flows) | Merged implementation, consolidated report |
 | **pr-flow** | PR lifecycle management | Completed task flows | Validation report, feedback task flows, lessons learned |
 | **test-flow** | Test planning & execution | Task docs | Test files, coverage report |
@@ -35,6 +36,7 @@ The default cadence varies by flow type:
 |------|-------------|-------------|-------------|-------------|
 | design-flow | CRITICAL (only gate) | — (auto) | — | — |
 | implement-flow | STANDARD | CRITICAL | — | — |
+| free-flow | STANDARD | STANDARD | CRITICAL | — |
 | orchestrate-flow | STANDARD (plan) | — (auto) | CRITICAL (merge) | — (auto) |
 | pr-flow (all modes) | STANDARD | CRITICAL | — | — |
 | test-flow | STANDARD | STANDARD | — | — |
@@ -219,7 +221,108 @@ Phase 2: COMMIT
     - Hooks won't fail (e.g. linter clean, no test failures)?
     - Pre-existing failing tests not silently bypassed?
 
-  Opt-out: --no-commit skips sub-task 2.2 (gate still presents).
+   Opt-out: --no-commit skips sub-task 2.2 (gate still presents).
+```
+
+### Free Flow Phases
+
+The free flow is a lightweight alternative for work that doesn't warrant the full design-implement-review chain: bug fixes, small enhancements, one-line tweaks, minor refactors.
+
+```
+Phase 1: TALK
+  Sub-tasks (auto-proceed):
+    1.1 ASK
+        → Developer describes the issue in 2-3 sentences
+        → Clarify scope: bug fix, enhancement, design tweak, refactor, other?
+        → Ask if related to an existing task in the flow database
+    1.2 CONTEXT
+        → Load project KB (ARCHITECTURE, CONVENTIONS, PATTERNS, DECISIONS)
+        → Search flow-storage/tasks/ for related work:
+          matching keywords in task-design.md files, overlapping files
+          in task-flow "Files to Create/Modify" lists, prior free-flow records,
+          relevant lessons-learned
+    1.3 SCOPE
+        → Categorize: bug fix / enhancement / design tweak / refactor / other
+        → Determine KB placement:
+          - Related to existing task → nests under that task's
+            flow-storage/tasks/{task-name}/implement/flow-plan/
+          - Standalone → creates flow-storage/tasks/{free-flow-name}/implement/flow-plan/
+
+  [GATE TYPE B — STANDARD]
+  Scope review: developer sees issue summary, scope category, KB placement
+  decision, and related KB entries found.
+
+Phase 2: PLAN
+  Sub-tasks (auto-proceed):
+    2.1 ANALYZE
+        → Identify files to touch (create/modify/delete)
+        → Find reference implementations in codebase
+        → Read relevant source code
+    2.2 CROSS-REF
+        → For each file in 2.1, search all task-flow files' "Files to Create"
+          and "Files to Modify" sections for matches
+        → Any match = impacted task-flow — needs "Free-Flow Update" appended
+          to Implementation Notes
+        → Does the change alter behavior in a signed-off task-design.md?
+          Flag for a TDD deviation entry
+        → Build impact report
+    2.3 PROPOSE
+        → Concise plan: files to change, changes per file, test strategy
+        → Bug fixes include: root cause, fix, regression risk
+        → Determine free-flow name (kebab-case)
+
+  [GATE TYPE B — STANDARD]
+  Plan review: developer sees the plan, impact report, and free-flow name.
+
+Phase 3: FIX
+  Sub-tasks (auto-proceed):
+     3.1 IMPLEMENT
+        → First, create a minimal task-flow stub with status: in_progress
+          at the KB location from Phase 1.3 (enables session resume)
+        → Write code changes per the plan
+        → Follow CONVENTIONS.md and PATTERNS.md
+        → Apply profile rules
+        → Bug fixes: include a regression test
+    3.2 VALIDATE
+        → Run test suite (NEVER skip)
+        → Run lint/typecheck per profile rules
+        → Verify fix addresses the issue
+        → Check backward compatibility (Rule 14)
+     3.3 RECORD
+        → Update the task-flow stub (from 3.1) with the full record:
+          frontmatter status → complete, accepted-date set, add
+          Summary, Scope, Files Changed, Implementation Notes,
+          Root Cause (for bugs)
+        → Apply KB impact updates from 2.2:
+          - Impacted task-flows: append "Free-Flow Update" to Implementation Notes
+          - Impacted task-design.md: add deviation to task-technical-design.md
+          - New patterns → PATTERNS.md
+          - Notable decisions → DECISIONS.md
+    3.4 COMMIT
+        → Stage: code changes + new task-flow file + updated KB files
+        → Compose conventional commit message with KB impact mention
+        → Run git commit
+
+  [GATE TYPE C — CRITICAL]
+  Fix + KB review: developer sees files changed, task-flow record,
+  KB updates applied, proposed commit message.
+  
+  ⚠️ Commit lands in history; KB updates become permanent record.
+  
+  Failure modes to verify before [A]ccept:
+    - Code addresses the issue from Phase 1 TALK?
+    - Regression test included (if bug fix)?
+    - Full test suite passes; no regressions?
+    - Impact report from 2.2 fully applied?
+    - Task-flow frontmatter has free-flow: true?
+    - Staged files: only intended changes, no stray edits?
+    - Commit message: correct type + KB impact mentioned?
+
+  Opt-out: --no-commit skips sub-task 3.4.
+
+  Sub-agent mode: gates suppressed (Rule 16). Returns a structured
+  report to the caller. See profiles/generic/skeletons/free-flow.md
+  for the report format.
 ```
 
 ### Orchestrate Flow Phases

@@ -35,6 +35,7 @@ This profile **always matches** with low confidence (1/5). It serves as the fall
 |--------|-------------|
 | **design-flow** | Task design with diagrams (class, package, sequence) |
 | **implement-flow** | Task-flow-by-task-flow implementation |
+| **free-flow** | Quick unstructured work — bug fixes, small enhancements, refactors |
 | **pr-flow** | PR validation, feedback handling, knowledge capture |
 | **test-flow** | Test planning and execution |
 | **deploy-flow** | Release and deployment |
