@@ -8,7 +8,7 @@ Get ai-flow-anything running in 5 minutes.
 
 ```bash
 cd your-project
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 ```
 
 Or download and extract to `.ai-workflow/`.

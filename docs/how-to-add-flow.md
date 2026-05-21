@@ -148,10 +148,7 @@ Map to OWASP Top 10 and compliance requirements (GDPR, SOC2).
 
 1. Create file `.ai-workflow/flows/{name}-flow.md`
 2. Write flow following structure above
-3. Use in AI assistant:
-   ```
-   /{name}-flow
-   ```
+3. Invoke from your AI assistant using whatever style your platform supports — slash command on Claude Code (`/{name}-flow`) and OpenCode, natural language anywhere else ("run the {name} flow for X"). Add the new flow to the intent table in `.ai-workflow/instructions.md` so the AI recognises its trigger phrases.
 
 ---
 

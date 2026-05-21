@@ -48,7 +48,7 @@ Use this when ai-flow-anything should be available only inside one repository.
 From your project root:
 
 ```bash
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 
 # Install 9 skills + 8 commands as symlinks (preferred):
 for skill in ai-flow-anything design-flow implement-flow free-flow parallel-implement-flow pr-flow test-flow deploy-flow docs-flow; do
@@ -91,7 +91,7 @@ done
 Use this when you want ai-flow-anything available across every project, with the ai-flow-anything core cloned somewhere stable (e.g. `~/tools/ai-flow-anything/`).
 
 ```bash
-git clone https://github.com/yourusername/ai-flow-anything.git ~/tools/ai-flow-anything
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git ~/tools/ai-flow-anything
 mkdir -p ~/.config/opencode/skills/ai-flow-anything
 ln -s ~/tools/ai-flow-anything/platforms/opencode/SKILL.md ~/.config/opencode/skills/ai-flow-anything/SKILL.md
 ```

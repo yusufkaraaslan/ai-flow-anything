@@ -31,7 +31,7 @@ Supports:
 
 ## Capabilities
 
-All 6 flows with Godot-specific patterns:
+All 8 flows with Godot-specific patterns:
 - Node-based architecture
 - GDScript conventions
 - Signal system

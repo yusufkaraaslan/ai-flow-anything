@@ -40,7 +40,7 @@ Supports:
 
 ## Capabilities
 
-All 6 flows with mobile-specific patterns:
+All 8 flows with mobile-specific patterns:
 - Screen/page architecture
 - State management
 - Navigation/routing

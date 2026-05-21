@@ -1,6 +1,6 @@
 ---
 name: ai-flow-anything
-description: Universal workflow generator. Detects your project type, asks about your needs, and generates tailored AI-assisted development flows (design, implement, PR, test, deploy, docs) with living documentation and knowledge base support. Zero installation — everything is markdown that the AI reads and executes.
+description: Universal workflow generator. Detects your project type, asks about your needs, and generates tailored AI-assisted development flows (design, implement, free, parallel-implement, PR, test, deploy, docs) with living documentation and knowledge base support. Zero installation — everything is markdown that the AI reads and executes.
 argument-hint: [command] [args]
 ---
 

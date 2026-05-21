@@ -7,7 +7,7 @@ Install ai-flow-anything for use with [Claude Code](https://claude.com/claude-co
 From your project root:
 
 ```bash
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 
 # Symlinks (preferred — `git pull` in .ai-workflow/ then propagates updates automatically):
 

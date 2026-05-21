@@ -44,6 +44,8 @@ Works with any Unity version and any frameworks:
 |--------|-------------|
 | **design-flow** | Task design with Unity-specific diagrams and component architecture |
 | **implement-flow** | Per-task-flow implementation with C# patterns and Unity lifecycle |
+| **free-flow** | Quick fixes, tweaks, small refactors with Unity-specific validation (missing references, console errors) |
+| **parallel-implement-flow** | Parallel implementation of all task flows via worktrees + subagents |
 | **pr-flow** | PR validation with Unity-specific checks (scene references, prefab integrity) |
 | **test-flow** | Unity Test Framework (EditMode/PlayMode) integration |
 | **deploy-flow** | Unity build pipeline and store submission |

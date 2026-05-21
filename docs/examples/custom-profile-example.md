@@ -17,9 +17,10 @@ Building a profile from scratch for a unique tech stack.
 
 ## Step 1: Create Directory
 
+From the ai-flow-anything repo root (clone it first if you haven't: `git clone https://github.com/yusufkaraaslan/ai-flow-anything.git`):
+
 ```bash
-cd ai-flow-anything/profiles
-cp -r generic rust-cli
+cp -r profiles/generic profiles/rust-cli
 ```
 
 ---
@@ -42,7 +43,7 @@ Command-line tools written in Rust.
 - 2/3: "Likely Rust"
 
 ## Capabilities
-All 6 flows with Rust-specific patterns.
+All 8 flows with Rust-specific patterns.
 
 ## Conventions
 - Error handling with `anyhow`

@@ -7,7 +7,7 @@ Install ai-flow-anything for use with [GitHub Copilot](https://github.com/featur
 From your project root:
 
 ```bash
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 mkdir -p .github
 ln -s ../.ai-workflow/platforms/github-copilot/copilot-instructions.md .github/copilot-instructions.md
 ```

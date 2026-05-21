@@ -29,7 +29,7 @@ ai-flow-anything generates tailored AI-assisted development workflows for your p
 
 ```bash
 cd your-project
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 ```
 
 ### 2. Activate the wrapper for your AI platform

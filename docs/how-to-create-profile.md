@@ -23,6 +23,8 @@ profiles/your-profile/
 └── skeletons/
     ├── design-flow.md
     ├── implement-flow.md
+    ├── free-flow.md
+    ├── parallel-implement-flow.md
     ├── pr-flow.md
     ├── test-flow.md
     ├── deploy-flow.md

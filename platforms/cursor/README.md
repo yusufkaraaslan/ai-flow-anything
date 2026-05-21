@@ -7,7 +7,7 @@ Install ai-flow-anything for use with [Cursor](https://cursor.com).
 From your project root:
 
 ```bash
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 mkdir -p .cursor/rules
 ln -s ../../.ai-workflow/platforms/cursor/ai-flow-anything.mdc .cursor/rules/ai-flow-anything.mdc
 ```

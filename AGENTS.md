@@ -24,8 +24,8 @@ docs/               → Project documentation (how-to guides, not runtime logic)
 
 ### Before modifying anything, read in this order:
 1. `instructions.md` — orchestration contract
-2. `universal/rules.md` — 15 numbered rules with severity (`error` / `warning` / `info`)
-3. `universal/workflow-structure.md` — 6 flow types and phase architecture
+2. `universal/rules.md` — 17 numbered rules with severity (`error` / `warning` / `info`)
+3. `universal/workflow-structure.md` — 8 flow types and phase architecture
 4. `CLAUDE.md` at repo root — additional hard rules for this repo
 
 ### Rules that are load-bearing (do not soften without discussion):
@@ -48,9 +48,8 @@ docs/               → Project documentation (how-to guides, not runtime logic)
    - `README.md` — Detection hints + confidence scoring
    - `discovery.md` — Slot discovery script
    - `rules.md` — Tech-stack-specific conventions
-   - `skeletons/*.md` — Six flow templates (design, implement, pr, test, deploy, docs)
-3. Leave or delete the literal `{skeletons}/` directory (template rendering leftover) — it is not referenced.
-4. Update the profile table in `README.md` and `instructions.md`.
+   - `skeletons/*.md` — Eight flow templates (design, implement, free, parallel-implement, pr, test, deploy, docs)
+3. Update the profile table in `README.md` and `instructions.md`.
 
 ## Adding a new platform wrapper
 

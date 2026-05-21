@@ -33,7 +33,7 @@ Supports:
 
 ## Capabilities
 
-All 6 flows with frontend-specific patterns:
+All 8 flows with frontend-specific patterns:
 - Component architecture
 - State management
 - Routing

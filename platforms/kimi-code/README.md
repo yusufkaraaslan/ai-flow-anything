@@ -23,7 +23,7 @@ Once Kimi adds auto-loading (the task is requested but not yet shipped as of thi
 From your project root:
 
 ```bash
-git clone https://github.com/yourusername/ai-flow-anything.git .ai-workflow
+git clone https://github.com/yusufkaraaslan/ai-flow-anything.git .ai-workflow
 ln -s .ai-workflow/platforms/kimi-code/AGENTS.md AGENTS.md
 ```
 
