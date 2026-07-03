@@ -7,7 +7,7 @@
 
 ## When to Use
 
-- New game mechanics (blockers, boosters, enemies, abilities)
+- New game mechanics (enemies, abilities, items, power-ups)
 - UI tasks (screens, HUD elements, menus)
 - System changes (save/load, audio, networking)
 - Level design tools

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ai-flow-anything is a markdown-only project. There is no code, no build system, no test suite, no CLI.**
 
-> **Naming note:** This repo was renamed to **ai-flow-anything**. The local directory may still be `magic-seed/` — that's a stale artifact. All references use the new name.
+> **Naming note:** The product, the brand, and every reference is **ai-flow-anything**. If your local checkout directory has a different name (from before the rename), that's just a stale artifact — don't let it leak into docs or generated content.
 
 It is a *workflow generator* whose runtime is the AI itself. All artifacts are prose markdown files that an AI assistant reads and acts on. ai-flow-anything is platform-agnostic: the workflow logic lives in `instructions.md` at the repo root, and per-platform wrappers in `platforms/{tool}/` adapt that logic to each AI's discovery and trigger conventions (Claude Code skill YAML, Cursor `.mdc` rules, GitHub Copilot always-on instructions, OpenCode skills, Kimi Code `AGENTS.md`).
 

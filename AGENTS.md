@@ -2,7 +2,7 @@
 
 This repo is a **markdown-only workflow generator** — there is no code, no build system, no test suite, and no CLI. The runtime is the AI itself reading and acting on markdown files.
 
-> **Naming note:** This repo was renamed to **ai-flow-anything**. The local directory may still be `magic-seed/` — that's a stale artifact. All references use the new name.
+> **Naming note:** The product, the brand, and every reference is **ai-flow-anything**. If your local checkout directory has a different name (from before the rename), that's just a stale artifact — don't let it leak into docs or generated content.
 
 ## Hard constraints
 

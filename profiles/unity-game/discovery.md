@@ -108,7 +108,7 @@ For each layer (Model, Controller, View, etc.):
 
 **Discovery:**
 Scan `Scripts/` subdirectories:
-- `Blockers/`, `Boosters/`, `Items/` → Game mechanics
+- `Enemies/`, `Abilities/`, `Items/` → Game mechanics
 - `UI/`, `HUD/`, `Menus/` → Interface
 - `Audio/`, `VFX/` → Presentation
 - `AI/`, `Pathfinding/` → Systems
