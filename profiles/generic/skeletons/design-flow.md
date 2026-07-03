@@ -65,6 +65,8 @@ This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes aft
 
 **1.2 DESIGN (Visual-First)**
 - Ask developer: "Describe this task in 1-2 sentences"
+- Classify the task (Rule 4): **system** (new systems, refactors, architecture, non-trivial control flow or data model — diagrams required) or **content** (assets, audio, VFX, theming, copy, config — diagrams optional). Default when ambiguous: system. Record as `Task Class:` in the canonical status block; developer can override at the gate.
+- For **content** tasks, diagrams may be skipped with a one-line justification in task-design.md ("Diagrams skipped: content task — no new control flow or data model"). The remaining 1.2 steps then apply only if diagrams are produced.
 - Generate class diagram (PlantUML) showing main entities, relationships, key methods
 - Generate package/module diagram showing where new code fits + dependencies
 - Render every `.puml` to `.svg` (Rule 4 — diagrams mandatory means *visible* diagrams)
@@ -143,13 +145,16 @@ This flow has **1 review gate** (CRITICAL) in Phase 1. Phase 2 auto-executes aft
 **Sub-tasks (auto-execute after Phase 1 [A]ccept):**
 
 **2.1 FINALIZE**
-- Update task-design.md status header:
+- Update task-design.md's canonical status block **in place** (Rule 9 — never append a second block or a "signed off" section elsewhere):
   ```markdown
-  > **Status:** v2.0 (SIGNED OFF)
+  > **Status:** SIGNED OFF
+  > **Version:** v1.0
+  > **Task Class:** {system|content}
   > **Signed Off By:** {developer}
   > **Date:** {date}
   > **Immutable:** Yes
   ```
+- Verify with the Rule 9 machine check: exactly one `> **Status:**` line in the file; no sign-off wording outside the block.
 
 **2.2 COMMIT** *(skipped with --no-commit)*
 - Run `git commit` with the message previewed at Phase 1:
@@ -172,18 +177,15 @@ Developer: "I want a user authentication task"
 AI: Generating class diagram v1...
     [diagram: User, AuthService, TokenManager, UserRepository]
 
-AI: Does this match your intent?
-    [A]ccept / [M]odify / [R]estart
+AI: Does this match your intent? (informal check-in while drafting —
+    not a phase gate; the one real gate comes at the end of Phase 1)
 
-Developer: M
 Developer: "Add PasswordValidator and EmailService"
 
 AI: Updated diagram v2...
     [diagram with added classes]
 
-AI: [A]ccept / [M]odify / [R]estart
-
-Developer: A
+Developer: "Looks right, continue"
 
 AI: Generating text documentation from approved diagram...
 ```

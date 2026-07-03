@@ -1,6 +1,6 @@
 ---
 name: ai-flow-anything
-description: Orchestrator skill for the ai-flow-anything task-development workflow. Use this skill ONLY for (a) initializing ai-flow-anything in a new project, (b) showing project workflow status across in-flight tasks, (c) searching the project knowledge base, or (d) when the developer's request is ambiguous about which phase flow applies. For specific phase work — design, implement, free, parallel-implement, test, PR validation, deploy, docs — prefer the dedicated per-flow skills (design-flow, implement-flow, free-flow, parallel-implement-flow, pr-flow, test-flow, deploy-flow, docs-flow). ai-flow-anything enforces design-before-code: no task code without a signed-off task-design.md.
+description: Orchestrator skill for the ai-flow-anything task-development workflow. Use this skill ONLY for (a) initializing ai-flow-anything in a new project, (b) showing project workflow status across in-flight tasks, (c) searching the project knowledge base, or (d) when the developer's request is ambiguous about which phase flow applies. For specific phase work — design, implement, free, parallel-implement, test, PR validation, deploy, docs, KB sync — prefer the dedicated per-flow skills (design-flow, implement-flow, free-flow, parallel-implement-flow, pr-flow, test-flow, deploy-flow, docs-flow, kb-sync-flow). ai-flow-anything enforces design-before-code: no task code without a signed-off task-design.md.
 license: MIT
 metadata:
   audience: developers
@@ -29,6 +29,8 @@ OpenCode loads this skill on demand based on the `description` above. Typical tr
 - "Process PR feedback for <task>"
 - "Capture lessons learned for <task>"
 - "Search the knowledge base for <query>"
+- "Sync the knowledge base" / "the KB is stale" / "reconcile task statuses"
+- "Update ai-flow-anything" (re-sync the installed `.ai-workflow/` core from a newer ai-flow-anything version)
 
 If the developer expresses any of these intents, translate it to the corresponding ai-flow-anything action and follow `instructions.md`.
 

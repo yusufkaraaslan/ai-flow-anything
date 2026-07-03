@@ -1,5 +1,5 @@
 ---
-description: Universal workflow generator. Apply when the developer asks to initialize ai-flow-anything, design or implement a task, run a flow (design, implement, pr, test, deploy, docs), validate a task for PR, capture lessons learned, or search the project knowledge base.
+description: Universal workflow generator. Apply when the developer asks to initialize ai-flow-anything, design or implement a task, run a flow (design, implement, free, parallel-implement, pr, test, deploy, docs, kb-sync), validate a task for PR, capture lessons learned, search the project knowledge base, or sync the knowledge base with the codebase.
 alwaysApply: false
 ---
 

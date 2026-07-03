@@ -41,6 +41,7 @@ This profile **always matches** with low confidence (1/5). It serves as the fall
 | **test-flow** | Test planning and execution |
 | **deploy-flow** | Release and deployment |
 | **docs-flow** | Documentation maintenance |
+| **kb-sync-flow** | Reconcile KB + task records with the live codebase |
 
 ---
 

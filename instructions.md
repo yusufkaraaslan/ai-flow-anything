@@ -13,9 +13,11 @@ ai-flow-anything responds to the following developer intents. Each platform wrap
 | Intent | What the AI does |
 |--------|------------------|
 | **Initialize ai-flow-anything for this project** | Detect project type, discover the codebase, ask the developer for missing context, and generate tailored flows into `.ai-workflow/flows/`. |
-| **Run a specific flow** (design, implement, free, parallel-implement, pr, test, deploy, docs) | Load the corresponding flow file from `.ai-workflow/flows/` and execute its phases against the named task. |
-| **Show project workflow status** | Read the knowledge base and report progress across in-flight tasks and their task flows. |
+| **Update ai-flow-anything in this project** | Re-sync the installed `.ai-workflow/` core (instructions, universal/, profiles/, wrappers) from a newer ai-flow-anything version while preserving rendered flows, project rules, and the knowledge base. See "Updating an Existing Install" below. |
+| **Run a specific flow** (design, implement, free, parallel-implement, pr, test, deploy, docs, kb-sync) | Load the corresponding flow file from `.ai-workflow/flows/` and execute its phases against the named task. |
+| **Show project workflow status** | Read the knowledge base and report progress across in-flight tasks and their task flows, then run the drift audit (doctor checks) from `universal/workflow-structure.md` "Status Mode" — read-only. |
 | **Search the knowledge base** | Query `flow-storage/project/`, `flow-storage/team/`, and `flow-storage/tasks/` for relevant prior work. |
+| **Sync the knowledge base** | Run kb-sync-flow: audit every KB claim and task record against the live codebase, correct stale entries at review gates, reconcile drifted statuses, stamp `Last Synced` (Rule 18). |
 
 When the developer expresses one of these intents — whether through a slash command on a platform that supports them, a natural-language request, or any other channel — the AI follows the workflow described below.
 
@@ -117,13 +119,13 @@ For each tool identified in Step 0, install the matching wrapper(s) to its canon
 
 | Tool | Source | Destination |
 |---|---|---|
-| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all eight flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all eight command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design-flow,implement-flow,free-flow,parallel-implement-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,free-flow,parallel-implement-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md` (9 skills + 8 commands = 17 files) |
+| OpenCode | `platforms/opencode/SKILL.md` (orchestrator) **plus** all nine flow skill bodies in `platforms/opencode/flow-skills/{flow}/SKILL.md` **plus** all nine command files in `platforms/opencode/commands/{name}.md` | `.opencode/skills/ai-flow-anything/SKILL.md`, `.opencode/skills/{design-flow,implement-flow,free-flow,parallel-implement-flow,pr-flow,test-flow,deploy-flow,docs-flow,kb-sync-flow}/SKILL.md`, AND `.opencode/commands/{design-flow,implement-flow,free-flow,parallel-implement-flow,test-flow,pr-flow,deploy-flow,docs-flow,kb-sync-flow}.md` (10 skills + 9 commands = 19 files) |
 | Claude Code | `platforms/claude/SKILL.md` (master) **plus** `platforms/claude/flow-skills/parallel-implement-flow/SKILL.md` (per-flow skill) **plus** `platforms/claude/agents/parallel-implementer.md` (custom subagent) **plus** `platforms/claude/commands/parallel-implement-flow.md` (slash command) | `.claude/skills/ai-flow-anything/SKILL.md`, `.claude/skills/parallel-implement-flow/SKILL.md`, `.claude/agents/parallel-implementer.md`, AND `.claude/commands/parallel-implement-flow.md` (4 files) |
 | Cursor | `platforms/cursor/ai-flow-anything.mdc` | `.cursor/rules/ai-flow-anything.mdc` |
 | GitHub Copilot | `platforms/github-copilot/copilot-instructions.md` | `.github/copilot-instructions.md` (append, do not overwrite if file already exists) |
 | Kimi-Code CLI | `platforms/kimi-code/AGENTS.md` | `AGENTS.md` at repo root (append, do not overwrite — see notes in `platforms/kimi-code/README.md`) |
 
-**Why OpenCode installs nine skills plus eight commands:** OpenCode has two concepts — *skills* (`.opencode/skills/{name}/SKILL.md`, agent decides via tool call when to load) and *commands* (`.opencode/commands/{name}.md`, user types `/{name}` to invoke directly). They're complementary, not redundant. Skills give the agent strong description-driven matching for natural-language requests; commands give the developer a one-keystroke way to start a flow without going through the `/skills` picker. Installing only skills leaves the developer with a two-click invocation (`/skills` → pick); installing both gets parity with Claude Code's `/design-flow <task>` slash UX. Each command file (~15–25 lines) is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow.
+**Why OpenCode installs ten skills plus nine commands:** OpenCode has two concepts — *skills* (`.opencode/skills/{name}/SKILL.md`, agent decides via tool call when to load) and *commands* (`.opencode/commands/{name}.md`, user types `/{name}` to invoke directly). They're complementary, not redundant. Skills give the agent strong description-driven matching for natural-language requests; commands give the developer a one-keystroke way to start a flow without going through the `/skills` picker. Installing only skills leaves the developer with a two-click invocation (`/skills` → pick); installing both gets parity with Claude Code's `/design-flow <task>` slash UX. Each command file (~15–25 lines) is a prompt template that loads the matching flow skill and passes `$ARGUMENTS` as the task/task-flow.
 
 **Why Claude Code installs four files (only one flow has a per-flow skill so far):** Claude Code's master `SKILL.md` covers most flows via its command alias table (`/design-flow`, `/implement-flow`, `/pr-flow`, etc. all map to natural-language intents). **Parallel-implement-flow is the exception** — it requires parallel subagent dispatch with per-subagent worktree isolation, which is a different primitive than a single-session flow. To support it natively, Claude Code needs three additional pieces beyond the master skill:
 
@@ -146,6 +148,7 @@ Clone or copy the ai-flow-anything core into `.ai-workflow/` so the project owns
 ```
 .ai-workflow/
 ├── instructions.md          ← from ai-flow-anything root
+├── VERSION                  ← copy of VERSION from ai-flow-anything root (used by the update intent)
 ├── universal/               ← copy of universal/ from ai-flow-anything
 ├── profiles/
 │   ├── generic/             ← always installed (canonical-flow fallback)
@@ -239,6 +242,7 @@ When the developer's request matches one of the intents below, load and follow t
 | "validate X for PR" / "PR check" | `.ai-workflow/flows/pr-flow.md` |
 | "deploy X" / "build" | `.ai-workflow/flows/deploy-flow.md` |
 | "update docs" / "docs for X" | `.ai-workflow/flows/docs-flow.md` |
+| "sync the KB" / "the KB is stale" / "reconcile task statuses" | `.ai-workflow/flows/kb-sync-flow.md` |
 
 **Hard rules — do not violate:**
 
@@ -268,8 +272,9 @@ If multiple host tools were chosen in Step 0, write the directive to every appli
 
 Before declaring init complete, confirm every artifact landed. The AI must be able to answer "yes" to all of these:
 
-- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **nine** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,free-flow,parallel-implement-flow,pr-flow,test-flow,deploy-flow,docs-flow}/SKILL.md`, AND all **eight** commands: `.opencode/commands/{design-flow,implement-flow,free-flow,parallel-implement-flow,test-flow,pr-flow,deploy-flow,docs-flow}.md`. The skills picker should show 9 entries; typing `/` should suggest the 8 commands. Either missing means the install is incomplete. For Claude Code specifically, verify all **four** files are present: `.claude/skills/ai-flow-anything/SKILL.md`, `.claude/skills/parallel-implement-flow/SKILL.md`, `.claude/agents/parallel-implementer.md`, and `.claude/commands/parallel-implement-flow.md`. The Agent tool's `subagent_type` listing should include `parallel-implementer`; typing `/parallel-implement-flow` should autocomplete to the command. Either missing means the install is incomplete and parallel-implement-flow will fall back to manual worktree allocation.
+- [ ] **Wrapper(s) installed** — the file(s) at the destination(s) from the table in Step 7.1 exist and (if symlinks) resolve to the ai-flow-anything source. For OpenCode specifically, verify all **ten** skills are present: `.opencode/skills/{ai-flow-anything,design-flow,implement-flow,free-flow,parallel-implement-flow,pr-flow,test-flow,deploy-flow,docs-flow,kb-sync-flow}/SKILL.md`, AND all **nine** commands: `.opencode/commands/{design-flow,implement-flow,free-flow,parallel-implement-flow,test-flow,pr-flow,deploy-flow,docs-flow,kb-sync-flow}.md`. The skills picker should show 10 entries; typing `/` should suggest the 9 commands. Either missing means the install is incomplete. For Claude Code specifically, verify all **four** files are present: `.claude/skills/ai-flow-anything/SKILL.md`, `.claude/skills/parallel-implement-flow/SKILL.md`, `.claude/agents/parallel-implementer.md`, and `.claude/commands/parallel-implement-flow.md`. The Agent tool's `subagent_type` listing should include `parallel-implementer`; typing `/parallel-implement-flow` should autocomplete to the command. Either missing means the install is incomplete and parallel-implement-flow will fall back to manual worktree allocation.
 - [ ] **`instructions.md` reachable** — either at `.ai-workflow/instructions.md` (Layout A) or via a symlink resolving to ai-flow-anything (Layout B). The wrapper's "Read `instructions.md` before acting" sentence must not be a dangling reference.
+- [ ] **`VERSION` present** — `.ai-workflow/VERSION` exists and matches the ai-flow-anything source's `VERSION`. Without it, the update intent can't tell what's installed.
 - [ ] **`universal/rules.md` reachable** — at `.ai-workflow/universal/rules.md` or via the symlink.
 - [ ] **Detected profile reachable** — at `.ai-workflow/profiles/{detected}/` or via the symlink. At minimum the four files `README.md`, `discovery.md`, `rules.md`, and `skeletons/` must be present.
 - [ ] **Generic profile reachable as fallback** — at `.ai-workflow/profiles/generic/`. Always required because slim profile skeletons defer to `profiles/generic/skeletons/{flow}.md` for canonical content. If detected profile *is* generic, this is the same install as the line above and only one copy is needed.
@@ -279,6 +284,34 @@ Before declaring init complete, confirm every artifact landed. The AI must be ab
 - [ ] **Smoke test** — re-read the wrapper file you just installed and confirm the path it references (`instructions.md`) resolves. If it doesn't, the install is broken.
 
 If any check fails, fix it before reporting "ai-flow-anything initialized" to the developer. Do not present the install as successful when the next session won't be able to load the workflow.
+
+---
+
+## Updating an Existing Install
+
+Layout A installs are snapshots — without an update path, every project forks permanently the day it's initialized. When the developer says "update ai-flow-anything" (or a flow notices `.ai-workflow/VERSION` differs from a newer ai-flow-anything source they point you at):
+
+**1. Compare versions.** Read `.ai-workflow/VERSION` (installed) and the source clone's `VERSION`. If the installed copy has no `VERSION` file, it predates versioning — treat it as older than any versioned release. Report both to the developer before changing anything.
+
+**2. Re-sync the core (safe to overwrite — these are ai-flow-anything-owned, never project-customized):**
+- `.ai-workflow/instructions.md`
+- `.ai-workflow/VERSION`
+- `.ai-workflow/universal/`
+- `.ai-workflow/profiles/{installed}/` (the detected profile AND `profiles/generic/`)
+
+**3. Re-install platform wrappers** per Step 7.1 for the host tool(s) in use. Copies get refreshed; symlinks are already current.
+
+**4. NEVER overwrite (project-owned):**
+- `.ai-workflow/flows/` — rendered output, possibly hand-customized
+- `.ai-workflow/rules.md` — project-specific rules
+- `flow-storage/` — the knowledge base and all task records
+- The project's `AGENTS.md` / `CLAUDE.md` directive block (update between the sentinels only if the directive template changed, per Step 7.6 idempotency)
+
+**5. Re-render check.** For each installed flow in `.ai-workflow/flows/`, compare against its (updated) skeleton. If the skeleton changed since the flow was rendered, offer a per-flow choice: re-render (developer loses local customizations to that flow — show a diff first), or keep the existing render. New flow types added by the update (e.g. a flow that didn't exist at init time): offer to render them now.
+
+**6. Verify.** Re-run Step 8. Report what changed: version delta, files re-synced, flows re-rendered vs kept, new flows added.
+
+The whole update is presented at a single **[A]/[F]/[R]** gate *before* any file is overwritten: show the version delta, the list of files to re-sync, and the re-render plan, then apply on [A]ccept.
 
 ---
 
@@ -294,9 +327,10 @@ When acting on any ai-flow-anything intent, read files in this order. Paths are 
 5. profiles/{detected}/rules.md          (after detection)
 6. profiles/{detected}/skeletons/*.md    (during generation)
 7. profiles/generic/skeletons/free-flow.md (when using free-flow — canonical)
-8. universal/diagram-standards.md        (when generating diagrams)
-9. universal/knowledge-base-spec.md      (when creating KB)
-10. .ai-workflow/rules.md                 (if present — project-specific overrides, layered last)
+8. profiles/generic/skeletons/kb-sync-flow.md (when using kb-sync-flow — canonical)
+9. universal/diagram-standards.md        (when generating diagrams)
+10. universal/knowledge-base-spec.md      (when creating KB)
+11. .ai-workflow/rules.md                 (if present — project-specific overrides, layered last)
 ```
 
 ---
@@ -403,7 +437,7 @@ When the developer asks to run a flow against a task (for example, "design task 
 4. Execute phases, producing the artifacts the flow specifies
 5. Present for developer review at each phase gate
 
-The same pattern applies to all flow types — design, implement, free, pr, test, deploy, docs — and to any custom flows the project has added.
+The same pattern applies to all flow types — design, implement, free, parallel-implement, pr, test, deploy, docs, kb-sync — and to any custom flows the project has added.
 
 ---
 

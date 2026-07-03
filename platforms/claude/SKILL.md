@@ -17,8 +17,9 @@ When the developer uses one of these slash commands, treat it as the correspondi
 | Slash command | Intent |
 |---------------|--------|
 | `/ai-flow-anything init` | Initialize ai-flow-anything for this project |
-| `/ai-flow-anything flow <name>` | Run a specific flow (`<name>` is one of: design, implement, free, parallel-implement, pr, test, deploy, docs) |
-| `/ai-flow-anything status` | Show project workflow status |
+| `/ai-flow-anything update` | Update an existing install to the current ai-flow-anything version (see `instructions.md` "Updating an Existing Install") |
+| `/ai-flow-anything flow <name>` | Run a specific flow (`<name>` is one of: design, implement, free, parallel-implement, pr, test, deploy, docs, kb-sync) |
+| `/ai-flow-anything status` | Show project workflow status (includes the drift audit / doctor checks) |
 | `/ai-flow-anything kb <query>` | Search the knowledge base |
 | `/design-flow <task>` | Run the design flow against `<task>` |
 | `/implement-flow <task>` | Run the implement flow against `<task>` (sequential, one task flow at a time) |
@@ -28,6 +29,7 @@ When the developer uses one of these slash commands, treat it as the correspondi
 | `/deploy-flow <task>` | Run the deploy flow against `<task>` |
 | `/docs-flow <task>` | Run the docs flow against `<task>` |
 | `/free-flow <issue>` | Run the free flow against `<issue>` — quick bug fixes, tweaks, small refactors |
+| `/kb-sync-flow [scope]` | Run the KB sync flow — reconcile the knowledge base and task records with the live codebase (`scope`: project, team, tasks, a task name, or empty for all) |
 
 If the developer expresses one of these intents in natural language ("design a task called auth", "implement the next task flow", "implement all task flows for auth in parallel") instead of a slash command, treat it the same way.
 

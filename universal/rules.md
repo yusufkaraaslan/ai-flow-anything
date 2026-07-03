@@ -35,7 +35,7 @@ All documentation in `docs/` is living — updated at every workflow step, never
 
 ## Rule 3: Unlimited Iteration Review Gates
 
-Every phase ends with developer review. Options are always:
+Every STANDARD and CRITICAL phase gate presents developer review. Options are always:
 
 - **[A]ccept** — Proceed to next phase
 - **[F]eedback** — Provide feedback, flow revises and re-presents
@@ -47,11 +47,20 @@ Every phase ends with developer review. Options are always:
 - Developer must explicitly type "A" or "Accept"
 - Feedback must be specific and actionable
 
+**Scope:** Gate types and cadence are defined in `universal/workflow-structure.md` "Phase Gate Protocol". LIGHT (Gate Type A) phases are context-loading steps that produce no reviewable artifact — they report what was loaded and auto-proceed with an interrupt window. They are not review gates and this rule does not apply to them. Every phase that produces artifacts ends in a STANDARD or CRITICAL gate.
+
 ---
 
-## Rule 4: Diagrams Are Mandatory
+## Rule 4: Diagrams Are Mandatory (Scaled by Task Class)
 
-Every task design must produce at minimum:
+Every task is classified at design time (design-flow sub-task 1.2) as one of two classes, recorded as `Task Class:` in the canonical status block (Rule 9):
+
+- **system** — new systems, architecture changes, refactors, cross-cutting integrations, anything with non-trivial control flow or a data model. **Diagrams REQUIRED** (severity: error).
+- **content** — assets, audio, VFX, UI theming/polish, copy, configuration, data-only additions. **Diagrams OPTIONAL** (severity: warning): may be skipped only when task-design.md records a one-line justification, e.g. "Diagrams skipped: content task — no new control flow or data model."
+
+Default when ambiguous: **system**. The developer can override the classification at the design gate.
+
+For **system** tasks (and content tasks that opt in), the design must produce at minimum:
 
 1. **Class diagram** — Core abstractions and relationships
 2. **Package/module diagram** — Dependencies and layering
@@ -96,6 +105,8 @@ The AI never decides a phase is "good enough" without developer input.
 **Correct:**
 - "Phase complete. Review and type [A]ccept, [F]eedback, or [R]eject"
 - Waiting for explicit developer input before proceeding
+
+**Clarification:** LIGHT gates (Gate Type A in `universal/workflow-structure.md`) are not auto-approval — they cover context-loading phases that produce no reviewable artifact. Every phase that produces artifacts ends in a STANDARD or CRITICAL gate; the developer decides there.
 
 ---
 
@@ -152,17 +163,34 @@ accepted-date: null       # set when developer accepts implementation
 
 ## Rule 9: Design Lock After Sign-Off
 
-After developer accepts task-design.md, it becomes immutable:
+After developer accepts task-design.md, it becomes immutable. Sign-off state lives in the **canonical status block** — a strict, machine-greppable schema:
 
 ```markdown
-> **Status:** v2.0 (SIGNED OFF)
+> **Status:** SIGNED OFF
+> **Version:** v1.0
+> **Task Class:** system
 > **Signed Off By:** {developer name}
-> **Date:** {date}
+> **Date:** {ISO-8601 date}
 > **Immutable:** Yes
 ```
 
+**Schema rules (strict):**
+- **Exactly one status block per document**, located immediately after the H1 title. No secondary status markers anywhere else in the file (no "Signed Off" footers, no per-section status lines).
+- `Status:` is one of exactly: `Draft` → `In Review` → `SIGNED OFF`. Nothing else.
+- `Version:` starts at `v1.0`. It never changes after sign-off (post-sign-off changes are forbidden — that's the point of this rule).
+- `Task Class:` is `system` or `content` (Rule 4).
+- `Immutable:` is `Yes` if and only if `Status:` is `SIGNED OFF`; otherwise `No`.
+- Before sign-off: `Status: Draft` or `In Review`, `Signed Off By: —`, `Immutable: No`.
+- Sign-off (design-flow sub-task 2.1 FINALIZE) **updates this block in place** — it never appends a second block or a "signed off" section elsewhere.
+
+**Machine check** (used by design-flow gates, status mode, and kb-sync-flow):
+```
+grep -c '^> \*\*Status:\*\*' task-design.md         # must equal 1
+tail -n +10 task-design.md | grep -ci 'signed off'  # must equal 0 — no sign-off wording outside the status block
+```
+
 **Implications:**
-- Changes after lock require new version or new task
+- Changes after lock require a new task (or an explicit, developer-initiated re-open recorded in DECISIONS.md)
 - Deviations during implementation are recorded in task-technical-design.md, not task-design.md
 - Post-merge, edge cases and deviations feed into next iteration
 
@@ -191,6 +219,8 @@ Before doing anything else, read:
 This provides: architecture rules, framework patterns, coding standards, 
 and reference implementations. **Do not skip this step.**
 ```
+
+**Trust, but verify:** loaded KB content is only useful if it is true. Rule 18 requires a freshness spot-check as part of context loading.
 
 ---
 
@@ -332,6 +362,26 @@ Parallel task flows in the parallel-implement-flow use isolated git worktrees. E
 
 ---
 
+## Rule 18: Knowledge Base Freshness
+
+A stale knowledge base is worse than an empty one: Rule 10 injects KB content as trusted context at the top of every flow run, so wrong facts poison every downstream decision.
+
+**Load-time spot-check (every flow):** as part of context loading (Rule 10), verify 2–3 load-bearing KB claims against observable reality before proceeding. Minimum set:
+- **Test framework** — does the framework named in ARCHITECTURE.md / onboarding.md match what's actually in the project (addon directories, dev dependencies, test file imports)?
+- **Count/constraint claims** — do numeric constraints (e.g. "exactly N autoloads", "M services") match the current config/manifest?
+- **Phase/status labels** — does the project phase or status in the KB match the root README / CLAUDE.md / AGENTS.md?
+
+**On contradiction:**
+- Flag it at the current flow's next gate: "KB says X, project shows Y."
+- Recommend running **kb-sync-flow** to repair.
+- Do NOT silently trust the stale claim, and do NOT silently fix the KB mid-flow (that derails the current flow and hides the drift from the developer).
+
+**Staleness signal:** project- and team-level KB files carry a `> **Last Synced:** {date}` header line, stamped by kb-sync-flow. Status mode reports the age; flows may warn when it exceeds the team's cadence.
+
+**Active repair:** kb-sync-flow (see `universal/workflow-structure.md`) is the flow that walks every KB entry and task record, checks each claim against the live codebase, and applies corrections at review gates.
+
+---
+
 ## Enforcement
 
 These rules are enforced by:
@@ -341,6 +391,6 @@ These rules are enforced by:
 4. **Knowledge base** — Violations recorded in lessons-learned
 
 **Severity levels:**
-- **error** — Must fix before proceeding (Rule 1, 2, 4, 6, 8, 9, 16)
-- **warning** — Should fix, can proceed with justification (Rule 3, 7, 10, 11, 12, 17)
+- **error** — Must fix before proceeding (Rule 1, 2, 4 for system tasks, 6, 8, 9, 16)
+- **warning** — Should fix, can proceed with justification (Rule 3, 4 for content tasks, 7, 10, 11, 12, 17, 18)
 - **info** — Best practice, noted but not blocking (Rule 5, 13, 14, 15)

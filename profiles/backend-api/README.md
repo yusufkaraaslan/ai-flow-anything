@@ -35,7 +35,7 @@ Supports:
 
 ## Capabilities
 
-All 8 flows with backend-specific patterns:
+All 9 flows with backend-specific patterns:
 - API design (REST, GraphQL, gRPC)
 - Database integration
 - Authentication/authorization

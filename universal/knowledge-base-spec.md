@@ -65,10 +65,10 @@ flow-storage/tasks/{task-name}/
 
 **Purpose:** Complete design specification for the task.
 
-**Status lifecycle:**
+**Status lifecycle** (tracked in the canonical status block — Rule 9 schema, exactly one block, immediately after the H1):
 - `Draft` — Initial creation by design-flow Phase 1
 - `In Review` — Presented at the Phase 1 gate for developer feedback
-- `v2.0 (SIGNED OFF)` — After [A]ccept at the Phase 1 gate (IMMUTABLE)
+- `SIGNED OFF` — After [A]ccept at the Phase 1 gate (IMMUTABLE)
 
 **Sections (example):**
 1. Overview
@@ -82,9 +82,11 @@ flow-storage/tasks/{task-name}/
 9. Edge Cases
 10. Open Questions
 
-**Lock after sign-off:**
+**Lock after sign-off** (the block is updated IN PLACE — never append a second block or a "signed off" section elsewhere):
 ```markdown
-> **Status:** v2.0 (SIGNED OFF)
+> **Status:** SIGNED OFF
+> **Version:** v1.0
+> **Task Class:** system
 > **Signed Off By:** Developer Name
 > **Date:** 2026-04-23
 > **Immutable:** Yes
@@ -205,6 +207,8 @@ flow-storage/project/
 ├── PATTERNS.md                  # Reusable patterns catalog
 └── DECISIONS.md                 # Architecture Decision Records (ADRs)
 ```
+
+**Freshness header (Rule 18):** every project- and team-level KB file carries a `> **Last Synced:** {ISO-8601 date}` line near the top, stamped by kb-sync-flow whenever it verifies/corrects the file. Status mode reports the age. A file with no stamp reads as "never synced" — trust its claims accordingly.
 
 ### Files
 
@@ -361,6 +365,8 @@ A data object that represents a domain concept (user, order, product).
 | PR flow, `feedback` mode | Task | Create feedback task flows |
 | PR flow, `capture` mode | All tiers | Update lessons-learned, patterns, decisions |
 | Code refactoring | Project | Update patterns, architecture |
+| KB sync flow | All tiers | Verify every claim against the codebase; correct stale entries; reconcile drifted task-record statuses; stamp `Last Synced` |
+| Rule 18 load-time spot-check (any flow) | — | Detect contradictions; flag at gate; recommend kb-sync-flow (read-only) |
 
 ### Update Rules
 

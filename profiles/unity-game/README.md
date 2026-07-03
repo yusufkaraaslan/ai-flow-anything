@@ -50,6 +50,7 @@ Works with any Unity version and any frameworks:
 | **test-flow** | Unity Test Framework (EditMode/PlayMode) integration |
 | **deploy-flow** | Unity build pipeline and store submission |
 | **docs-flow** | Unity docs upkeep with component diagrams |
+| **kb-sync-flow** | Reconcile KB + task records with the live Unity project (manifest, ProjectSettings, asmdefs) |
 
 ---
 

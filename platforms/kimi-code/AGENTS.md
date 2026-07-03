@@ -13,7 +13,7 @@ If the developer's request matches one of these intents, read `instructions.md` 
 - Initialize ai-flow-anything for this project
 - Design a task
 - Implement the next task flow for a task
-- Run a flow (design, implement, free, parallel-implement, pr, test, deploy, docs) against a task
+- Run a flow (design, implement, free, parallel-implement, pr, test, deploy, docs, kb-sync) against a task
 - Quick fix / bug fix / tweak / hotfix
 - Implement all task flows for X in parallel
 - Validate a task for PR

@@ -39,7 +39,7 @@ If your environment doesn't support symlinks, copy each file to the same destina
 | `.claude/agents/parallel-implementer.md` | Custom subagent with `isolation: worktree` — auto-creates per-subagent worktrees, no manual `git worktree add` needed |
 | `.claude/commands/parallel-implement-flow.md` | Slash command `/parallel-implement-flow <task>` for one-keystroke invocation |
 
-Only `parallel-implement-flow` currently ships with its own per-flow skill, subagent, and command — the other flows (design, implement, free, pr, test, deploy, docs) are run via the master skill and the natural-language intents listed in its command alias table.
+Only `parallel-implement-flow` currently ships with its own per-flow skill, subagent, and command — the other flows (design, implement, free, pr, test, deploy, docs, kb-sync) are run via the master skill and the natural-language intents listed in its command alias table.
 
 ## How it works
 

@@ -19,6 +19,7 @@ Every profile provides one or more flows. The core set is:
 | **test-flow** | Test planning & execution | Task docs | Test files, coverage report |
 | **deploy-flow** | Deployment & release | Build artifacts | Deployed release, verification report |
 | **docs-flow** | Documentation maintenance | Existing docs | Updated docs, new patterns catalog |
+| **kb-sync-flow** | Reconcile the knowledge base and task records with the project's current reality | Scope (project / team / tasks / all) | Corrected KB files, reconciled task-record statuses, sync report |
 
 Profiles may add custom flow types (e.g., `security-flow`, `perf-flow`).
 
@@ -41,6 +42,7 @@ The default cadence varies by flow type:
 | pr-flow (all modes) | STANDARD | CRITICAL | — | — |
 | test-flow | STANDARD | STANDARD | — | — |
 | docs-flow | STANDARD | CRITICAL | — | — |
+| kb-sync-flow | STANDARD | CRITICAL | — | — |
 | deploy-flow | CRITICAL | CRITICAL | — | — |
 
 Phases marked `— (auto)` execute automatically after the preceding gate is [A]ccepted — they apply decisions already reviewed and have no separate gate. This eliminates redundant "are you sure about that decision you just approved?" interruptions while keeping critical decision points where they matter.
@@ -58,6 +60,15 @@ Phase 1: DESIGN
         → Read existing docs and architecture
         → Explore codebase for related work
     1.2 DESIGN (Visual-First)
+        → Classify the task (Rule 4): system (new systems, refactors,
+          architecture, non-trivial control flow or data model) or
+          content (assets, audio, VFX, theming, copy, config).
+          Default when ambiguous: system. Record as `Task Class:` in
+          the canonical status block. Developer can override at the gate.
+        → For content tasks, diagrams may be skipped with a one-line
+          justification in task-design.md ("Diagrams skipped: content
+          task — no new control flow or data model"). All remaining
+          1.2 steps then apply only if diagrams are produced.
         → Generate class diagram, package diagram, sequence diagrams
           per universal/diagram-standards.md
         → Render every diagram source to .svg (or .png fallback) —
@@ -147,9 +158,15 @@ Phase 2: LOCK & COMMIT
   
   Sub-tasks:
     2.1 FINALIZE
-        → Sign off task-design.md (status: v2.0 (SIGNED OFF),
-          Immutable: Yes). This is a mechanical application of
-          the decision already made at the Phase 1 gate.
+        → Sign off task-design.md by updating its canonical status
+          block IN PLACE (Rule 9 schema: Status: SIGNED OFF,
+          Version: v1.0, Task Class, Signed Off By, Date,
+          Immutable: Yes). Never append a second status block or a
+          "signed off" section elsewhere in the file. Verify with
+          the Rule 9 machine check (exactly one status block; no
+          sign-off wording outside it). This is a mechanical
+          application of the decision already made at the Phase 1
+          gate.
     2.2 COMMIT
         → Run git commit with the message previewed at Phase 1.
           Skipped with --no-commit.
@@ -220,6 +237,10 @@ Phase 2: COMMIT
     - Co-author trailer present if required by project policy?
     - Hooks won't fail (e.g. linter clean, no test failures)?
     - Pre-existing failing tests not silently bypassed?
+    - KB delta recorded: DOC-SYNC (1.5) actually applied — PATTERNS.md /
+      DECISIONS.md / task-technical-design.md updated, or "no KB
+      impact" is explicitly true for this task flow? (Rule 18 — an
+      unrecorded delta is how the KB goes stale.)
 
    Opt-out: --no-commit skips sub-task 2.2 (gate still presents).
 ```
@@ -532,6 +553,119 @@ Phase 2: COMMIT
     - task-design.md untouched (Rule 9 — immutable).
 
   Opt-out: --no-commit skips sub-task 2.1 (gate still presents).
+```
+
+### KB Sync Flow Phases
+
+The kb-sync flow reconciles the knowledge base and task records with the project's **current reality**. A stale KB is worse than an empty one (Rule 18): Rule 10 loads it as trusted context at the top of every flow run. Run kb-sync when a flow flags a contradiction, after a stretch of work done outside flows, before onboarding someone, or on a regular cadence.
+
+Scope argument: `project` | `team` | `tasks` | `all` (default `all`).
+
+```
+Phase 1: SYNC
+  Sub-tasks (auto-proceed):
+    1.1 INVENTORY
+        → Read every KB file in scope:
+          - flow-storage/project/*.md
+          - flow-storage/team/*.md
+          - .ai-workflow/rules.md (project-specific rules)
+          - flow-storage/tasks/*/ task records (frontmatter,
+            status blocks) — for scope `tasks` or `all`
+        → Extract each VERIFIABLE claim: framework/library names,
+          numeric constraints ("exactly N autoloads"), phase/status
+          labels, commands, file paths, pattern references,
+          directory structures.
+    1.2 REALITY SCAN
+        → Check each claim against the live project:
+          - Referenced files/dirs still exist?
+          - Test framework named matches what's installed
+            (addon dirs, dev dependencies, test imports)?
+          - Documented commands still valid (binaries, paths,
+            script names)?
+          - Pattern references in PATTERNS.md point at real code?
+          - Numeric constraints match current config/manifest?
+          - Phase/status labels match root README / CLAUDE.md /
+            AGENTS.md?
+          (Profile skeletons add tech-specific reality signals —
+           e.g. project.godot [autoload] section for Godot,
+           package.json scripts for web.)
+    1.3 RECONCILE TASK RECORDS  (scope `tasks` or `all`)
+        → Drifted statuses: for each flow-plan file with
+          status: pending or in_progress, check whether its
+          declared Files to Create exist in the tree, its tests
+          exist, and git log references it. If implemented,
+          propose status: complete + accepted-date + a one-line
+          reconciliation note ("Reconciled by kb-sync-flow
+          {date}: implementation verified in codebase").
+        → Sign-off block integrity: run the Rule 9 machine check
+          on every task-design.md — exactly one canonical status
+          block, no contradictory secondary markers. Propose
+          formatting normalization ONLY; if it is ambiguous
+          whether a design was actually signed off, ask the
+          developer at the gate — never guess the decision.
+        → Misplaced artifacts: files outside their spec'd
+          subdirectory (per universal/knowledge-base-spec.md) —
+          propose the move.
+        → Superseded/duplicate task dirs: propose marking the
+          stale one "Superseded by {task}" in its status block
+          and cross-linking. Never delete without an explicit
+          developer instruction (Rule 2 — but superseded ≠
+          archive copy; the marker keeps history honest).
+    1.4 PROPOSE & APPLY
+        → Build the sync report: per file, claim → observed
+          reality → proposed edit (as a diff).
+        → Apply the diffs in place (Rule 2 — living documents,
+          no archives, no v2 copies).
+        → Stamp `> **Last Synced:** {date}` on each project/team
+          KB file touched (add the line if missing).
+        → HARD CONSTRAINTS:
+          - Never edit the content of a signed-off task-design.md
+            (Rule 9). Formatting-only normalization of a malformed
+            status block is the sole exception.
+          - Design deviations discovered during the scan go to
+            task-technical-design.md, not task-design.md.
+          - Never touch source code — kb-sync fixes the RECORDS to
+            match reality, not reality to match the records. If the
+            scan reveals the CODE is wrong (violates a real rule),
+            report it at the gate as a finding for a separate
+            free-flow/implement-flow — do not fix it here.
+
+  [GATE TYPE B — STANDARD]
+  Sync review: developer sees the sync report (claim → reality →
+  edit), the applied diffs, and any ambiguous cases that need a
+  human decision (unsure sign-offs, superseded tasks, code-vs-
+  record conflicts).
+
+Phase 2: COMMIT
+  Sub-tasks (auto-proceed):
+    2.1 COMMIT
+        → Stage only KB and task-record files
+        → Compose commit message:
+            docs(kb-sync): reconcile KB with codebase — {N} corrections
+
+            Stale claims fixed: {list or count}
+            Task records reconciled: {count}
+            Last Synced stamped: {file count}
+        → Run git commit AFTER the gate is accepted
+
+  [GATE TYPE C — CRITICAL]
+  Commit review: presented BEFORE git commit executes.
+  ⚠️ These corrections become the trusted context every future
+  flow run loads (Rule 10). A wrong "correction" poisons future
+  work just like the staleness it replaced.
+  Failure modes to verify before [A]ccept:
+    - Every change traceable to an observed reality (no
+      speculative edits)?
+    - No source code staged (records only)?
+    - No signed-off task-design.md content changed (formatting-only
+      normalization at most)?
+    - Ambiguous cases resolved by the developer, not guessed?
+    - Last Synced stamps present on touched project/team files?
+
+  Opt-out: --no-commit skips sub-task 2.1 (gate still presents).
+
+  Sub-agent mode: gates suppressed (Rule 16). Returns a structured
+  report to the caller.
 ```
 
 ### Test Flow Phases
@@ -852,6 +986,22 @@ Every flow supports `--status` flag:
 - Suggest next action
 
 **No implementation in status mode.** Read-only.
+
+### Drift audit (doctor checks)
+
+Status mode is not a passive ledger read — it actively cross-checks the records against reality. These are the same checks kb-sync-flow runs in sub-tasks 1.2/1.3, but **read-only**: status reports, kb-sync-flow repairs.
+
+For the named task (or all tasks when invoked project-wide):
+
+1. **Drifted statuses** — flow-plan files with `status: pending`/`in_progress` whose declared files exist in the tree, whose tests exist, or that appear in git log → flag as "likely complete, record not updated."
+2. **Sign-off block integrity** — run the Rule 9 machine check on task-design.md: exactly one canonical status block, no contradictory sign-off wording elsewhere.
+3. **Misplaced artifacts** — files outside their spec'd subdirectory per `universal/knowledge-base-spec.md`.
+4. **KB contradictions** — the Rule 18 spot-check (test framework, numeric constraints, phase labels) against the live project.
+5. **KB staleness age** — report each project/team KB file's `Last Synced:` date (or "never synced").
+6. **Missing rendered diagrams** — any `.puml`/`.d2`/`.mmd` without a sibling `.svg`/`.png` (Rule 4).
+7. **Leaked placeholders** — `\{[a-z][a-z0-9_-]*\}` patterns in non-template files (Rule 12).
+
+**Output ends with a recommendation:** if any check fails, suggest running **kb-sync-flow** (for record/KB drift) or the appropriate flow (e.g. design-flow for a missing design). Status mode itself never writes.
 
 ---
 
