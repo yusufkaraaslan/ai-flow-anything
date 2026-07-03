@@ -71,24 +71,30 @@ Ask the AI to run a flow against a task. Examples (use whatever invocation style
 After initializing ai-flow-anything, your project has:
 
 ```
-.ai-workflow/
-├── flows/
-│   ├── design-flow.md              # Design tasks with diagrams
-│   ├── implement-flow.md           # Implement task flows with validation
-│   ├── free-flow.md                # Quick fixes, tweaks, small refactors
-│   ├── parallel-implement-flow.md  # Parallel implementation of all task flows
-│   ├── pr-flow.md                  # PR lifecycle management
-│   ├── test-flow.md                # Test planning & execution
-│   ├── deploy-flow.md              # Deployment & release
-│   ├── docs-flow.md                # Documentation maintenance
-│   └── kb-sync-flow.md             # Reconcile KB + task records with the codebase
-│
-└── knowledge-base/
-    ├── project/              # Architecture, conventions, patterns
-    └── team/                 # Onboarding, workflows, glossary
+.ai-workflow/                       ← ai-flow-anything core + your rendered flows
+├── instructions.md                 # Orchestration contract
+├── VERSION                         # Installed version (used by the update intent)
+├── universal/                      # Non-negotiable rules, workflow structure, KB spec
+├── profiles/                       # Generic + your detected profile
+├── rules.md                        # Project-specific rule overrides
+└── flows/
+    ├── design-flow.md              # Design tasks with diagrams
+    ├── implement-flow.md           # Implement task flows with validation
+    ├── free-flow.md                # Quick fixes, tweaks, small refactors
+    ├── parallel-implement-flow.md  # Parallel implementation of all task flows
+    ├── pr-flow.md                  # PR lifecycle management
+    ├── test-flow.md                # Test planning & execution
+    ├── deploy-flow.md              # Deployment & release
+    ├── docs-flow.md                # Documentation maintenance
+    └── kb-sync-flow.md             # Reconcile KB + task records with the codebase
+
+flow-storage/                       ← the three-tier knowledge base
+├── project/                        # Architecture, conventions, patterns, decisions
+├── team/                           # Onboarding, workflows, glossary
+└── tasks/                          # Per-task records (created by design-flow)
 ```
 
-Plus a per-task knowledge base that grows with every task:
+Each task gets its own record under `flow-storage/tasks/` that grows as the task moves through the flows:
 
 ```
 flow-storage/tasks/my-task/
