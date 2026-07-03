@@ -43,7 +43,7 @@ Command-line tools written in Rust.
 - 2/3: "Likely Rust"
 
 ## Capabilities
-All 8 flows with Rust-specific patterns.
+All 9 flows with Rust-specific patterns.
 
 ## Conventions
 - Error handling with `anyhow`

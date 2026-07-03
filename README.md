@@ -62,6 +62,7 @@ Ask the AI to run a flow against a task. Examples (use whatever invocation style
 - "Design a task called my-task" — runs the design flow
 - "Implement the next task flow for my-task" — runs the implement flow
 - "Validate my-task for PR" — runs the PR flow
+- "Sync the knowledge base" — runs the KB sync flow (reconciles docs with reality)
 
 ---
 
@@ -79,7 +80,8 @@ After initializing ai-flow-anything, your project has:
 │   ├── pr-flow.md                  # PR lifecycle management
 │   ├── test-flow.md                # Test planning & execution
 │   ├── deploy-flow.md              # Deployment & release
-│   └── docs-flow.md                # Documentation maintenance
+│   ├── docs-flow.md                # Documentation maintenance
+│   └── kb-sync-flow.md             # Reconcile KB + task records with the codebase
 │
 └── knowledge-base/
     ├── project/              # Architecture, conventions, patterns
@@ -111,6 +113,24 @@ flow-storage/tasks/my-task/
 └── docs/                                         # docs-flow output
     └── lessons-learned.md                        # Post-merge summary
 ```
+
+---
+
+## Keeping the Knowledge Base Honest
+
+The knowledge base is trusted context — every flow loads it before doing anything. But projects drift: a test framework gets swapped, a "hard" constraint gets relaxed, tasks ship outside the flows. A stale KB is worse than an empty one, because wrong facts poison every future flow run.
+
+ai-flow-anything defends against this on three levels:
+
+1. **Load-time spot-check (Rule 18)** — every flow verifies a few load-bearing KB claims (test framework, numeric constraints, phase labels) against the codebase before trusting them. Contradictions are flagged at the next review gate.
+2. **Status drift audit** — "Show workflow status" runs read-only doctor checks: task records stuck on `pending` for shipped features, malformed sign-off blocks, misplaced artifacts, KB files that were never synced.
+3. **KB sync flow** — "Sync the knowledge base" walks every KB entry and task record, checks each claim against the live codebase, and presents claim → observed reality → proposed fix at review gates. Corrections are applied in place and each verified file gets a `Last Synced` stamp.
+
+---
+
+## Updating
+
+Installs carry a `VERSION` file. When a new ai-flow-anything version ships, ask your AI to "update ai-flow-anything" — it re-syncs the core (instructions, universal rules, profiles, wrappers) while preserving your rendered flows, project rules, and knowledge base, and offers per-flow re-render diffs when skeletons changed. One review gate before anything is overwritten.
 
 ---
 

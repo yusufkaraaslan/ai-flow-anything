@@ -82,6 +82,19 @@ The AI will:
 
 ---
 
+## Step 7: Keep the Knowledge Base Honest
+
+The knowledge base is trusted context — every flow loads it first. Facts drift as your project evolves (test framework swapped, a constraint relaxed, tasks finished outside the flows), and a stale KB quietly feeds every future flow wrong facts.
+
+Two tools keep it honest:
+
+- **Status** — ask your AI: "Show workflow status." Besides progress, it runs a read-only drift audit: task records that say `pending` for shipped features, malformed sign-off blocks, KB claims that contradict the codebase, and how long ago each KB file was last synced.
+- **KB sync** — ask your AI: "Sync the knowledge base." It audits every KB claim and task record against the live codebase, shows you claim → reality → proposed fix, and applies corrections at review gates.
+
+Run a KB sync whenever status flags drift, after work done outside the flows, or at the end of each milestone.
+
+---
+
 ## Next Steps
 
 - [Read how to customize](how-to-customize.md)

@@ -51,6 +51,7 @@ AI: Generating flows...
     ✓ test-flow.md
     ✓ deploy-flow.md
     ✓ docs-flow.md
+    ✓ kb-sync-flow.md
 
 AI: Install complete!
     Flows available in .ai-workflow/flows/

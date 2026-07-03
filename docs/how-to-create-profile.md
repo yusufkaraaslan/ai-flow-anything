@@ -28,7 +28,8 @@ profiles/your-profile/
     ├── pr-flow.md
     ├── test-flow.md
     ├── deploy-flow.md
-    └── docs-flow.md
+    ├── docs-flow.md
+    └── kb-sync-flow.md
 ```
 
 ---

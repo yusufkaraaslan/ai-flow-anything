@@ -160,6 +160,13 @@ To share with profile users:
 2. Add the flow to the profile's README capability table
 3. Document the new flow's intent in `instructions.md` if it should be discoverable globally; otherwise the profile's skeletons surface it during initialization
 
+To add a flow to the **standard set** (every profile), additionally:
+
+4. Add its row to the flow-types table and gate-cadence table in `universal/workflow-structure.md`, plus a phase-definition section
+5. Add a canonical skeleton to `profiles/generic/skeletons/` and a slim defer-pattern overlay to every other profile
+6. Sweep the duplicated flow lists and file counts: `README.md`, `docs/`, `platforms/{tool}/` wrappers and READMEs, `instructions.md` Steps 7–8
+7. Bump `VERSION`
+
 ---
 
 ## Tips

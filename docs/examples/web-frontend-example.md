@@ -34,7 +34,7 @@ AI: Detecting project type...
     Confidence: 100%
 
 AI: Generating flows...
-    ✓ All 8 flows created
+    ✓ All 9 flows created
 ```
 
 ---
